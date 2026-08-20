@@ -1,0 +1,18 @@
+//
+//  bad_query.h
+//  bad_query
+//
+//  Created by Taj C on 7/21/26.
+//
+
+#ifndef bad_query_h
+#define bad_query_h
+
+#include <stdio.h>
+#include <stdbool.h>
+
+int64_t bad_query(char* path, bool create, char *group_identifier, bool is_group, char *probe_leaf);
+char *bad_query_list(char *path, int64_t max_inode);
+void bad_query_release(int64_t handle);
+
+#endif /* bad_query_h */

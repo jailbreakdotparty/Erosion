@@ -1,0 +1,12 @@
+.theos/
+packages/
+.DS_Store
+/Resources/Frameworks
+/Resources/*.dylib
+/lib/*.a
+pairing/
+build/
+xcuserdata/
+xcshareddata/
+*.ipa
+*.xcuserstate
