@@ -17,6 +17,13 @@ func mgSupported() -> Bool {
     return false
 }
 
+func isSupported() -> Bool {
+    if (doubleSystemVersion() >= 19.0 && doubleSystemVersion() < 27.0) || mgSupported() {
+        return true
+    }
+    return false
+}
+
 // device info getters
 func machineName() -> String {
     var systemInfo = utsname()

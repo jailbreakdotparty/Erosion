@@ -29,7 +29,6 @@ struct InfoSheet<CellContent: View, ButtonContent: View>: View {
         .padding(.horizontal, 25)
         .safeAreaInset(edge: .bottom) {
             button
-                .modifier(OverlayBackground())
         }
     }
 }
@@ -44,41 +43,16 @@ struct InfoSheetCell: View {
             HStack(spacing: 8) {
                 Image(systemName: icon)
                     .frame(width: 24, height: 22, alignment: .center)
+                    .foregroundStyle(Color.accentColor)
                 Text(title)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .font(.body.weight(.medium))
-            .foregroundStyle(Color.accentColor)
             
             Text(context)
                 .font(.callout)
                 .foregroundStyle(.secondary)
-        }
-    }
-}
-
-struct ConfirmButtonStyle: ButtonStyle {
-    @Environment(\.isEnabled) private var isEnabled
-    
-    func makeBody(configuration: Configuration) -> some View {
-        if #available(iOS 19.0, *) {
-            configuration.label
-                .buttonStyle(.plain)
-                .foregroundStyle(isEnabled ? Color(.label) : .gray)
-                .fontWeight(.medium)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .contentShape(.capsule)
-                .glassEffect(.regular.interactive().tint(isEnabled ? .blue : Color(.systemGray)), in: .capsule)
-        } else {
-            configuration.label
-                .buttonStyle(.plain)
-                .foregroundStyle(isEnabled ? Color(.label) : .gray)
-                .fontWeight(.medium)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .contentShape(.capsule)
-                .background(isEnabled ? Color.accentColor : Color(.systemGray), in: .capsule)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

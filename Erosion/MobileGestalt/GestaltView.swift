@@ -16,6 +16,7 @@ struct GestaltView: View {
     @AppStorage("mgWriteAtomically") private var mgWriteAtomically = true
     @AppStorage("mgAutoRespring") private var mgAutoRespring = false
     @AppStorage("hasShownSheet") private var hasShownSheet = false
+    @AppStorage("showTips") private var showTips = true
     @Environment(\.dismiss) private var dismiss
     
     @State private var mgSubtype = 0
@@ -27,6 +28,7 @@ struct GestaltView: View {
     @State private var mgProductType = ""
     
     @State private var showInfoSheet = false
+    @State private var idiotButtonTimerComplete = false
     
     var body: some View {
         NavigationStack {
@@ -113,7 +115,7 @@ struct GestaltView: View {
                     HStack(spacing: 10) {
                         Picker("Spoofing", selection: $mgProductType) {
                             Text("Default").tag(ogMachineName)
-                            if UIDevice.current.userInterfaceIdiom == .pad {
+                            if ogMachineName.contains("Pad") {
                                 if doubleSystemVersion() >= 17.4 {
                                     Text("iPad Pro 11-inch (M4)").tag("iPad16,3")
                                     Text("iPad Pro 11-inch (M4, Cellular)").tag("iPad16,4")
@@ -251,8 +253,6 @@ struct GestaltView: View {
                         if !hasShownSheet {
                             showInfoSheet = true
                         } else {
-                            dismiss()
-                            hasShownSheet = true
                             mgApply()
                         }
                     }
@@ -269,15 +269,27 @@ struct GestaltView: View {
                             InfoSheetCell(title: "Region Restrictions", icon: "map", context: MGMsg.region)
                         } button: {
                             Button("Apply") {
+                                showInfoSheet = false
+                                hasShownSheet = true
+                                idiotButtonTimerComplete = false
                                 mgApply()
                             }
                             .buttonStyle(ConfirmButtonStyle())
+                            .padding(.horizontal, 30)
+                            .padding(.bottom, device.userInterfaceIdiom == .pad ? 25 : 0)
+                            .disabled(!idiotButtonTimerComplete)
+                        }
+                    }
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                            idiotButtonTimerComplete = true
                         }
                     }
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button("Cancel") {
                                 showInfoSheet = false
+                                idiotButtonTimerComplete = false
                             }
                         }
                     }
@@ -361,6 +373,10 @@ struct GestaltView: View {
                 }
             } else {
                 throw "overwrite failed!"
+            }
+            
+            if showTips {
+                Alertinator.shared.alert(title: "Successfully appiled MobileGestalt tweaks!", body: "Respring your device for changes to appear." + (store.isEnabled([MGKey.appIntell]) ? " You'll have to reboot your device if you want to use Apple Intelligence." : ""), actionLabel: "Respring", action: { mgr.shouldRespring = true })
             }
         } catch {
             print("[!] failed to apply mobilegestalt: \(error)")

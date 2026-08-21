@@ -11,35 +11,55 @@ import UniformTypeIdentifiers
 
 let pbHandler = PBHandler()
 
+enum PBMsg {
+    static var noTendies = "Import some tendies to start applying custom wallpapers."
+    static var tooManyTendies = "You can only set a maximum of 15 wallpapers at a time. De-select another wallpaper pack if you'd like to apply this one!"
+    static var limitWarning = "You have more than five wallpapers set. This may cause some wallpapers to not show up properly. Are you still sure that you'd like to apply these wallpapers?"
+    static var corruption = "Please ensure that none of your wallpapers are corrupted, and try again."
+    static var finishApply = "PosterBoard will open once you continue. Please kill it from the App Switcher. If no wallpapers show up, try resetting Collections, MercuryPoster, or Videos in the settings."
+    static var applyInfo = "If no wallpapers appear inside of PosterBoard, reset Collections in settings and try again."
+}
+
 struct PosterBoardView: View {
     @AppStorage("pbContainerPath") private var pbContainerPath = ""
     @AppStorage("tendiesArray") private var tendiesArray: [TendiesObject] = []
     @AppStorage("showTips") private var showTips = true
+    @AppStorage("hasShownFirstRunMsg") private var hasShownFirstRunMsg = false
     
     @State private var showImporter = false
-    @State private var isApplying = false
-    
-    let columns = Array(repeating: GridItem(.flexible()), count: 2)
+    @State private var isReady = false
+    let columns = Array(repeating: GridItem(.flexible()), count: device.userInterfaceIdiom == .pad ? 4 : 2)
     
     var body: some View {
         ScrollView {
             if tendiesArray.isEmpty {
-                Button {
-                    showImporter = true
-                } label: {
-                    VStack(alignment: .leading) {
-                        CompactAlert(title: "No tendies imported!", icon: "exclamationmark.triangle.fill", text: "Import some tendies to start applying custom wallpapers.")
-                            .padding(.horizontal, 15)
+                if !isReady {
+                    HStack(spacing: 10) {
+                        ProgressView()
+                            .offset(y: 0.5)
+                        Text("Preparing...")
                     }
-                    .frame(alignment: .leading)
-                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .modifier(SectionPlatter())
+                    .padding(.horizontal, 15)
+                } else {
+                    Button {
+                        showImporter = true
+                    } label: {
+                        VStack(alignment: .leading) {
+                            CompactAlert(title: "No tendies imported!", icon: "exclamationmark.triangle.fill", text: PBMsg.noTendies)
+                                .padding(.horizontal, 15)
+                        }
+                        .frame(alignment: .leading)
+                        .multilineTextAlignment(.leading)
+                    }
                 }
             }
             LazyVGrid(columns: columns) {
                 ForEach($tendiesArray) { $tendies in
                     Button {
                         if !tendies.isOn && tendiesArray.filter({ $0.isOn }).flatMap({ $0.descrNames }).count > 15 {
-                            Alertinator.shared.alert(title: "Max wallpaper limit reached!", body: "You can only set a maximum of 15 wallpapers at a time. De-select another wallpaper pack if you'd like to apply this one!")
+                            Alertinator.shared.alert(title: "Max wallpaper limit reached!", body: PBMsg.tooManyTendies)
                         } else {
                             tendies.isOn.toggle()
                         }
@@ -89,9 +109,11 @@ struct PosterBoardView: View {
                         }
                         .contextMenu {
                             Button(role: .destructive) {
-                                let url = AppURL.pbFolders.appendingPathComponent(tendies.folderName)
-                                try? fm.removeItem(at: url)
-                                tendiesArray.removeAll { $0.id == tendies.id }
+                                withAnimation {
+                                    let url = AppURL.pbFolders.appendingPathComponent(tendies.folderName)
+                                    try? fm.removeItem(at: url)
+                                    tendiesArray.removeAll { $0.id == tendies.id }
+                                }
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
@@ -102,23 +124,22 @@ struct PosterBoardView: View {
             .padding(.horizontal, 15)
             .foregroundStyle(Color(.label))
         }
-        .navigationTitle("PosterBoard")
+        .navigationTitle("Wallpapers")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             doSetupStuff()
         }
-        .overlay {
-            if isApplying {
-                if #available(iOS 26.0, *) {
-                    HStack {
-                        ProgressView()
-                        Text("Applying Wallpapers...")
+        .safeAreaInset(edge: .bottom) {
+            if isReady {
+                VStack {
+                    Button {
+                        showImporter = true
+                    } label: {
+                        ButtonLabel(text: "Import .tendies", icon: "arrow.down.doc")
                     }
-                    .padding(15)
-                    .glassEffect(in: .rect(cornerRadius: 24))
-                } else {
-                    // Fallback on earlier versions
                 }
+                .buttonStyle(ActionButtonStyle())
+                .frame(maxWidth: .infinity)
             }
         }
         .toolbar {
@@ -129,6 +150,7 @@ struct PosterBoardView: View {
                     } label: {
                         Label("Import .tendies", systemImage: "arrow.down.doc")
                     }
+                    .disabled(!isReady)
                     
                     Button {
                         LSApplicationWorkspace().openApplication(withBundleID: "com.apple.PosterBoard")
@@ -144,6 +166,18 @@ struct PosterBoardView: View {
                                 TextField("PosterBoard Path", text: $pbContainerPath, axis: .vertical)
                                 Button("Open PosterBoard") {
                                     LSApplicationWorkspace().openApplication(withBundleID: "com.apple.PosterBoard")
+                                }
+                            } header: {
+                                HeaderLabel(text: "PosterBoard", icon: "photo")
+                            }
+                            
+                            Section {
+                                Button("Clear Imports") {
+                                    for object in tendiesArray {
+                                        let url = AppURL.pbFolders.appendingPathComponent(object.folderName)
+                                        try? fm.removeItem(at: url)
+                                    }
+                                    tendiesArray.removeAll()
                                 }
                                 Button("Reset Collections", role: .destructive) {
                                     let res = resetWallpapers(for: PBPath.wpKit)
@@ -164,25 +198,9 @@ struct PosterBoardView: View {
                                     }
                                 }
                             } header: {
-                                HeaderLabel(text: "PosterBoard", icon: "photo")
-                            }
-                            
-                            Section {
-                                Button("Clear Imports", role: .destructive) {
-                                    for object in tendiesArray {
-                                        let url = AppURL.pbFolders.appendingPathComponent(object.folderName)
-                                        try? fm.removeItem(at: url)
-                                    }
-                                    tendiesArray.removeAll()
-                                }
-                            } header: {
                                 HeaderLabel(text: "Data", icon: "loupe")
-                            }
-                            
-                            Section {
-                                Toggle("Show Tips", isOn: $showTips)
-                            } header: {
-                                HeaderLabel(text: "View Options", icon: "eyes.inverse")
+                            } footer: {
+                                Text("If you're having trouble applying custom wallpapers, try resetting any of the three extensions listed.")
                             }
                         }
                         .navigationTitle("PosterBoard Settings")
@@ -196,29 +214,35 @@ struct PosterBoardView: View {
             
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Apply", role: .adaptiveConfirm) {
-                    var res = false
-                    if tendiesArray.filter({ $0.isOn }).flatMap({ $0.descrNames }).count > 5 && showTips {
-                        Alertinator.shared.alert(title: "Before you begin...", body: "You have more than five wallpapers set. This may cause wallpapers to take a long time to apply, depending on how large they are. Are you still sure that you'd like to apply these wallpapers?", actionLabel: "Confirm", action: {
-                            isApplying = true
-                            res = applyObjects(tendiesArray.filter { $0.isOn }, at: AppURL.symlinks)
+                    if !hasShownFirstRunMsg {
+                        Alertinator.shared.alert(title: "Before you begin...", body: PBMsg.applyInfo, actionLabel: "Continue", action: {
+                            hasShownFirstRunMsg = true
+                            proceed()
                         })
+                    } else if tendiesArray.filter({ $0.isOn }).flatMap({ $0.descrNames }).count > 5 && showTips {
+                        Alertinator.shared.alert(title: "Before you begin...", body: PBMsg.limitWarning, actionLabel: "Confirm", action: {
+                            proceed() })
                     } else {
-                        isApplying = true
-                        res = applyObjects(tendiesArray.filter { $0.isOn }, at: AppURL.symlinks)
+                        proceed()
                     }
-                    isApplying = false
-                    if !res {
-                        Alertinator.shared.alert(title: "Failed to apply wallpapers!", body: "Please ensure that none of your wallpapers are corrupted, and try again.")
-                    } else {
-                        Haptic.shared.play(.soft)
-                        if showTips {
-                            Alertinator.shared.alert(title: "Restart PosterBoard to finish applying!", body: "PosterBoard will open once you continue. Please kill it from the App Switcher", showCancel: false, actionLabel: "Continue", action: { LSApplicationWorkspace().openApplication(withBundleID: "com.apple.PosterBoard") })
+                    
+                    @MainActor
+                    func proceed() {
+                        let res = applyObjects(tendiesArray.filter { $0.isOn }, at: AppURL.symlinks)
+                        if !res {
+                            Alertinator.shared.alert(title: "Failed to apply wallpapers!", body: PBMsg.corruption)
                         } else {
-                            LSApplicationWorkspace().openApplication(withBundleID: "com.apple.PosterBoard")
+                            Haptic.shared.play(.soft)
+                            if showTips {
+                                Alertinator.shared.alert(title: "Restart PosterBoard to finish applying!", body: PBMsg.finishApply, showCancel: false, actionLabel: "Continue", action: { LSApplicationWorkspace().openApplication(withBundleID: "com.apple.PosterBoard") })
+                            } else {
+                                LSApplicationWorkspace().openApplication(withBundleID: "com.apple.PosterBoard")
+                            }
                         }
                     }
                 }
                 .disabled(tendiesArray.filter({ $0.isOn }).isEmpty)
+                .disabled(pbContainerPath.isEmpty || !fm.fileExists(atPath: AppURL.pb.path))
             }
         }
         .fileImporter(isPresented: $showImporter, allowedContentTypes: [.item]) { result in
@@ -227,12 +251,15 @@ struct PosterBoardView: View {
     }
     
     private func doSetupStuff() {
-        if pbContainerPath.isEmpty {
-            pbContainerPath = FSHandlers().getPBContainer()
-        }
-        if !fm.fileExists(atPath: AppURL.pb.path) {
-            try? fm.createDirIfNeeded(at: AppURL.pb)
-            try? fm.createDirIfNeeded(at: AppURL.pbFolders)
+        DispatchQueue.global(qos: .userInitiated).async {
+            if pbContainerPath.isEmpty {
+                pbContainerPath = FSHandlers().getPBContainer()
+            }
+            if !fm.fileExists(atPath: AppURL.pb.path) {
+                try? fm.createDirIfNeeded(at: AppURL.pb)
+                try? fm.createDirIfNeeded(at: AppURL.pbFolders)
+            }
+            isReady = true
         }
     }
     
@@ -288,7 +315,9 @@ struct PosterBoardView: View {
                 }
             }
             if let tendies = pbHandler.makeObjectFromTendies(at: fileURL) {
-                tendiesArray.append(tendies)
+                withAnimation {
+                    tendiesArray.append(tendies)
+                }
             }
         case .failure(let error):
             print("(pb) failed to import file: \(error)")
