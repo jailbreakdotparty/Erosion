@@ -11,21 +11,12 @@ import MachO
 import UIKit
 import PartyUI
 
-enum mgInfoMessages {
-    static var ipadOSWarning = "This tweak is incredibly risky to use! Do not use this tweak if you have an alphanumeric passcode. Also, do turn off \"Show Dock In Stage Manager\", as your device will BOOTLOOP when rotating to landscape. Furthermore, this tweak will cause genernal instability in apps and weird scaling issues."
-    static var internalinstall = "This will enable a bunch of random features that are meant for Apple Internal use but were left inside of production iOS. Please note that enabling this toggle will break your ability to properly download Apple Intelligence or system apps from the App Store. Furthermore, this could cause other unforeseen issues with device functionality."
-    static var spoofUseless = "Spoofing your device model may break Face ID as well as other features. This tweak won't be of any value to you."
-    static var spoofAI = "Spoofing your device model may break Face ID as well as other features. You should only use it if you would like to download Apple Intelligence models on an unsupported device. Unspoofing could cause Apple Intelligence to break, but if you choose to unspoof, do NOT go back into the Apple Intelligence & Siri settings at all!"
-    static var aiInfo = "You will NOT get the new Siri AI features when enabling this tweak. For most device configurations, you'll only get the older Apple Intelligence UI. Make sure that you spoofed your device before applying."
-    static var supportWarning = "DO NOT ASK US FOR SUPPORT IF SOMETHING DOES NOT WORK PROPERLY! Many of these tweaks are completely dependent on both your device and Apple's servers working properly."
-}
-
 func mgWrite(_ data: Data) -> Bool {
     var res: (Bool, String)
     if UserDefaults.standard.bool(forKey: "mgWriteAtomically") {
-        res = writeFileAtomically(data, to: currentGestaltURL)
+        res = writeFileAtomically(data, to: MGURL.fsGestaltURL)
     } else {
-        res = writeFileTemp(data, to: currentGestaltURL)
+        res = writeFileTemp(data, to: MGURL.fsGestaltURL)
     }
     
     if !res.0 {

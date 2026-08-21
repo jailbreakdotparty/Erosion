@@ -9,15 +9,15 @@ import Foundation
 
 func writeFileTemp(_ data: Data, to url: URL) -> (Bool, String) {
     do {
-        let tempURL = currentGestaltURL.deletingLastPathComponent().appendingPathComponent(".\(currentGestaltURL.lastPathComponent).\(UUID().uuidString).tmp")
+        let tempURL = url.deletingLastPathComponent().appendingPathComponent(".\(url.lastPathComponent).\(UUID().uuidString).tmp")
         
         try data.write(to: tempURL, options: [.withoutOverwriting])
         defer { try? fm.removeItem(at: tempURL) }
         
-        if fm.fileExists(atPath: currentGestaltURL.path) {
-            let _ = try fm.replaceItemAt(currentGestaltURL, withItemAt: tempURL)
+        if fm.fileExists(atPath: url.path) {
+            let _ = try fm.replaceItemAt(url, withItemAt: tempURL)
         } else {
-            try fm.moveItem(at: tempURL, to: currentGestaltURL)
+            try fm.moveItem(at: tempURL, to: url)
         }
         
         return (true, "succeeded")

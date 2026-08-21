@@ -9,20 +9,14 @@ import SwiftUI
 import PartyUI
 import UniformTypeIdentifiers
 
-struct CustomKey: Identifiable, Codable {
-    var id: String { key }
-    var label: String
-    var key: String
-    var value: String
-    var isOn = false
-}
-
 struct GestaltView: View {
     @EnvironmentObject private var mgr: ErosionManager
     @StateObject private var store = GestaltStore.shared
     @AppStorage("mgOverrideGates") private var mgOverrideGates = false
     @AppStorage("mgWriteAtomically") private var mgWriteAtomically = true
     @AppStorage("mgAutoRespring") private var mgAutoRespring = false
+    @AppStorage("hasShownSheet") private var hasShownSheet = false
+    @Environment(\.dismiss) private var dismiss
     
     @State private var mgSubtype = 0
     @State private var mgOgSubtype = 0
@@ -60,16 +54,14 @@ struct GestaltView: View {
                         }
                         Spacer()
                         Button {
-                            Alertinator.shared.alert(title: "Subtype Info", body: "Only change your subtype if you want to move the dynamic island into a more viewable position. If you're looking to enable the dynamic island, turn on the toggle in this page!")
+                            Alertinator.shared.alert(title: "Subtype Info", body: MGMsg.subtype)
                         } label: {
                             Image(systemName: "info.circle")
                                 .frame(width: 24, height: 22)
                         }
                         .buttonStyle(.plain)
                     }
-                    
                     Toggle("Custom Device Name", isOn: $mgEnableDeviceName)
-                    
                     if mgEnableDeviceName {
                         TextField("Device Name", text: $mgDeviceName)
                     }
@@ -80,46 +72,41 @@ struct GestaltView: View {
                 if !isDynamIslandHD() || !isAODHD() || !isBootChimeHD() || !isChargeLimitHD() || mgOverrideGates {
                     Section {
                         if !isDynamIslandHD() || mgOverrideGates {
-                            PlainToggle(text: "Enable Dynamic Island", minSupportedVersion: 19.0, isOn: store.mgKeyBinding(["YlEtTtHlNesRBMal1CqRaA"]))
+                            PlainToggle(text: "Enable Dynamic Island", minSupportedVersion: 19.0, isOn: store.mgKeyBinding([MGKey.island]))
                         }
                         if !isAODHD() || mgOverrideGates {
-                            PlainToggle(text: "Enable AOD", minSupportedVersion: 18.0, isOn: store.mgKeyBinding(["j8/Omm6s1lsmTDFsXjsBfA", "2OOJf1VhaM7NxfRok3HbWQ"]))
-                            
-                            if store.mgKeyBinding(["j8/Omm6s1lsmTDFsXjsBfA", "2OOJf1VhaM7NxfRok3HbWQ"]).wrappedValue {
-                                PlainToggle(text: "Enable AOD Vibrancy", minSupportedVersion: 18.0, isOn: store.mgKeyBinding(["ykpu7qyhqFweVMKtxNylWA"]))
+                            PlainToggle(text: "Enable AOD", minSupportedVersion: 18.0, isOn: store.mgKeyBinding([MGKey.AOD, MGKey.AOTime]))
+                            if store.isEnabled([MGKey.AOD]) {
+                                PlainToggle(text: "Enable AOD Vibrancy", minSupportedVersion: 18.0, isOn: store.mgKeyBinding([MGKey.AODVibrancy]))
                             }
                         }
                         if !isBootChimeHD() || mgOverrideGates {
-                            PlainToggle(text: "Enable Charge Limit", minSupportedVersion: 17.0, isOn: store.mgKeyBinding(["37NVydb//GP/GrhuTN+exg"]))
+                            PlainToggle(text: "Enable Charge Limit", minSupportedVersion: 17.0, isOn: store.mgKeyBinding([MGKey.chargeLim]))
                         }
                         if !isChargeLimitHD() || mgOverrideGates {
-                            PlainToggle(text: "Enable Boot Chime", isOn: store.mgKeyBinding(["QHxt+hGLaBPbQJbXiUJX3w"]))
+                            PlainToggle(text: "Enable Boot Chime", isOn: store.mgKeyBinding([MGKey.bootChime]))
                         }
                     } header: {
                         HeaderLabel(text: "Hardware Features", icon: "gearshape")
                     }
                 }
                 
-                if !store.mgKeyBinding(["A62OafQ85EJAiiqKn4agtg"]).wrappedValue {
-                    Section {
-                        PlainToggle(text: "Enable Internal Install", infoType: .info, infoMessage: mgInfoMessages.internalinstall, isOn: store.mgKeyBinding(["EqrsVvjcYDdxHBiQmGhAWw"]))
-                        PlainToggle(text: "Enable Internal Build", isOn: store.mgKeyBinding(["LBJfwOEzExRxzlAnSuI7eg"]))
-                    } header: {
-                        HeaderLabel(text: "Internal", icon: "ant")
-                    }
+                Section {
+                    PlainToggle(text: "Enable Internal Install", infoType: .info, infoMessage: MGMsg.intInstall, isOn: store.mgKeyBinding([MGKey.intInstall]))
+                    PlainToggle(text: "Enable Internal Build", infoType: .info, infoMessage: MGMsg.intBuild, isOn: store.mgKeyBinding([MGKey.intBuild]))
+                } header: {
+                    HeaderLabel(text: "Internal", icon: "ant")
                 }
+                .disabled(store.isEnabled([MGKey.appIntell]))
                 
                 Section {
-                    let cacheExtra = store.mgCurrentDict["CacheExtra"] as? NSMutableDictionary ?? NSMutableDictionary()
-                    PlainToggle(text: "Enable SRD UI", minSupportedVersion: 26.0, isOn: store.mgKeyBinding(["XYlJKKkj2hztRP1NWWnhlw"]))
-                    if cacheExtra["h63QSdBCiT/z0WU6rdQv6Q"] as? String != "LL" || cacheExtra["yK+xavymRGZ3xWc1tb8XDg"] as? String != "LL/A" {
-                        PlainToggle(text: "Disable Region Restrictions", isOn: store.mgRegionRestrictionsBinding())
-                    }
+                    PlainToggle(text: "Enable SRD UI", minSupportedVersion: 26.0, isOn: store.mgKeyBinding([MGKey.srd]))
+                    PlainToggle(text: "Disable Region Restrictions", isOn: store.mgRegionRestrictionsBinding())
                     if !isAppleIntellHD() || mgOverrideGates {
-                        PlainToggle(text: "Enable Apple Intelligence", minSupportedVersion: 18.1, isOn: store.mgKeyBinding(["A62OafQ85EJAiiqKn4agtg"]))
-                            .onChange(of: store.mgKeyBinding(["A62OafQ85EJAiiqKn4agtg"]).wrappedValue) { (oldVal, newVal) in
+                        PlainToggle(text: "Enable Apple Intelligence", minSupportedVersion: 18.1, isOn: store.mgKeyBinding([MGKey.appIntell]))
+                            .onChange(of: store.mgKeyBinding([MGKey.appIntell]).wrappedValue) { (oldVal, newVal) in
                                 if newVal {
-                                    store.mgPullKeys(["EqrsVvjcYDdxHBiQmGhAWw", "LBJfwOEzExRxzlAnSuI7eg"])
+                                    store.mgPullKeys([MGKey.intBuild, MGKey.intInstall])
                                 }
                             }
                     }
@@ -150,9 +137,8 @@ struct GestaltView: View {
                                 }
                             }
                         }
-                        
                         Button {
-                            Alertinator.shared.alert(title: "Device Spoofing Info", body: isAppleIntellHD() ? mgInfoMessages.spoofUseless : mgInfoMessages.spoofAI)
+                            Alertinator.shared.alert(title: "Device Spoofing Info", body: isAppleIntellHD() ? MGMsg.spoofUseless : MGMsg.spoofAI)
                         } label: {
                             Image(systemName: "info.circle")
                                 .frame(width: 24, height: 22)
@@ -165,34 +151,33 @@ struct GestaltView: View {
                 
                 Section {
                     if !isCrashDectHD() || mgOverrideGates {
-                        PlainToggle(text: "Crash Detection", isOn: store.mgKeyBinding(["HCzWusHQwZDea6nNhaKndw"]))
+                        PlainToggle(text: "Crash Detection", isOn: store.mgKeyBinding([MGKey.crashDet]))
                     }
                     if !isPWMHD() || mgOverrideGates {
-                        PlainToggle(text: "Pulse Width Modulation", minSupportedVersion: 19.0, isOn: store.mgKeyBinding(["6IejgN+1Fmu5/QrZFOIeNw"]))
+                        PlainToggle(text: "Pulse Width Modulation", minSupportedVersion: 19.0, isOn: store.mgKeyBinding([MGKey.pwm]))
                     }
                     if ogMachineName.contains("iPhone") || mgOverrideGates {
-                        PlainToggle(text: "Apple Pencil Settings", isOn: store.mgKeyBinding(["yhHcB0iH0d1XzPO/CFd3ow"]))
+                        PlainToggle(text: "Apple Pencil", isOn: store.mgKeyBinding([MGKey.appPencil]))
                     }
                     if !isCamControlHD() || mgOverrideGates {
-                        PlainToggle(text: "Camera Control", minSupportedVersion: 18.0, isOn: store.mgKeyBinding(["CwvKxM2cEogD3p+HYgaW0Q", "oOV1jhJbdV3AddkcCg0AEA"]))
+                        PlainToggle(text: "Camera Control", minSupportedVersion: 18.0, isOn: store.mgKeyBinding([MGKey.camButton, MGKey.grapPefr]))
                     }
                     if !isActionButtonHD() || mgOverrideGates {
-                        PlainToggle(text: "Action Button", minSupportedVersion: 17.0, isOn: store.mgKeyBinding(["cT44WE1EohiwRzhsZ8xEsw"]))
+                        PlainToggle(text: "Action Button", minSupportedVersion: 17.0, isOn: store.mgKeyBinding([MGKey.actButton]))
                     }
                     if isHomeButtonHD() || mgOverrideGates {
-                        PlainToggle(text: "Tap to Wake", isOn: store.mgKeyBinding(["yZf3GTRMGTuwSV/lD7Cagw"]))
+                        PlainToggle(text: "Tap to Wake", isOn: store.mgKeyBinding([MGKey.tapToWake]))
                     }
                 } header: {
                     HeaderLabel(text: "Preference Bundles", icon: "gear")
                 }
                 
                 Section {
-                    let cacheExtra = store.mgCurrentDict["CacheExtra"] as? NSMutableDictionary
                     if machineName().contains("iPad") || mgOverrideGates {
-                        PlainToggle(text: "Enable Stage Manager", isOn: store.mgKeyBinding(["qeaj75wk3HF4DwQ8qbIi7g"]))
+                        PlainToggle(text: "Enable Stage Manager", isOn: store.mgKeyBinding([MGKey.stageMgr]))
                     }
-                    if cacheExtra?["+3Uf0Pm5F8Xy7Onyvko0vA"] as? String == "iPhone" || mgOverrideGates {
-                        PlainToggle(text: "Enable iPadOS UI", infoType: .warning, infoMessage: mgInfoMessages.ipadOSWarning, isOn: store.mgTrollPadBinding())
+                    if store.strVal(forKey: MGKey.deviceClass) == "iPhone" || mgOverrideGates {
+                        PlainToggle(text: "Enable iPadOS UI", infoType: .warning, infoMessage: MGMsg.ipadOS, isOn: store.mgTrollPadBinding())
                     }
                 } header: {
                     HeaderLabel(text: "iPadOS", icon: "ipad")
@@ -210,10 +195,11 @@ struct GestaltView: View {
                         }
                         
                         Button(role: .destructive) {
-                            Alertinator.shared.alert(title: "Are you sure you'd like to reset MobileGestalt?", body: "Resetting MobileGestalt involves deleting the original cache. This may cause unforseen consequences, such as data loss.", actionLabel: "Confirm", action: {
+                            Alertinator.shared.alert(title: "Are you sure you'd like to reset MobileGestalt?", body: MGMsg.mgReset, actionLabel: "Confirm", action: {
                                 do {
-                                    try fm.removeItem(at: currentGestaltURL)
-                                    Alertinator.shared.alert(title: "Successfully reset MobileGestalt!", body: "To complete the reset, you'll have to reboot your iPhone.", showCancel: false, actionLabel: "Exit App", action: { exitinator() })
+                                    try fm.removeItem(at: MGURL.savedGestaltURL)
+                                    try fm.removeItem(at: MGURL.fsGestaltURL)
+                                    Alertinator.shared.alert(title: "Successfully reset MobileGestalt!", body: MGMsg.mgResetComp, showCancel: false, actionLabel: "Exit App", action: { exitinator() })
                                 } catch {
                                     print("(mg) failed to reset mobilegestalt: \(error)")
                                 }
@@ -227,9 +213,20 @@ struct GestaltView: View {
                         NavigationLink {
                             List {
                                 Section {
-                                    Button("Export MobileGestalt") {
-                                        presentShareSheet(with: currentGestaltURL)
+                                    Button("Export Current Gestalt") {
+                                        presentShareSheet(with: MGURL.fsGestaltURL)
                                     }
+                                    Button("Export Original Gestalt") {
+                                        presentShareSheet(with: MGURL.savedGestaltURL)
+                                    }
+                                    Button("Reset Saved Gestalt", role: .destructive) {
+                                        Alertinator.shared.alert(title: "Warning!", body: "Before you save MobileGestalt, remove all tweaks so that they don't get re-applied if you ever want to reset again.", action: {
+                                            try? fm.removeItem(at: MGURL.savedGestaltURL)
+                                            let _ = mgLoadData()
+                                        })
+                                    }
+                                } header: {
+                                    HeaderLabel(text: "Data", icon: "loupe")
                                 }
                                 
                                 Section {
@@ -251,9 +248,11 @@ struct GestaltView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Apply", role: .adaptiveConfirm) {
-                        if store.mgKeyBinding(["A62OafQ85EJAiiqKn4agtg"]).wrappedValue || store.mgTrollPadBinding().wrappedValue {
+                        if !hasShownSheet {
                             showInfoSheet = true
                         } else {
+                            dismiss()
+                            hasShownSheet = true
                             mgApply()
                         }
                     }
@@ -262,17 +261,18 @@ struct GestaltView: View {
             .sheet(isPresented: $showInfoSheet) {
                 NavigationStack {
                     VStack {
-                        InfoSheet(title: "Before you begin...", cellContent: {
-                            InfoSheetCell(icon: "apple.intelligence", title: "Apple Intelligence", context: mgInfoMessages.aiInfo)
-                            InfoSheetCell(icon: "ipad", title: "iPadOS UI", context: mgInfoMessages.ipadOSWarning)
-                            InfoSheetCell(icon: "exclamationmark.triangle.fill", title: "Important Note!", context: mgInfoMessages.supportWarning)
-                        }, buttonContent: {
+                        InfoSheet(title: "Before you begin...") {
+                            InfoSheetCell(title: "Important Warning!", icon: "exclamationmark.triangle.fill", context: MGMsg.support)
+                                .modifier(SectionPlatter())
+                            InfoSheetCell(title: "Apple Intelligence (Classic)", icon: "apple.intelligence", context: MGMsg.spoofAI)
+                            InfoSheetCell(title: "iPadOS UI", icon: "ipad", context: MGMsg.ipadOS)
+                            InfoSheetCell(title: "Region Restrictions", icon: "map", context: MGMsg.region)
+                        } button: {
                             Button("Apply") {
                                 mgApply()
-                                showInfoSheet = false
                             }
                             .buttonStyle(ConfirmButtonStyle())
-                        })
+                        }
                     }
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
@@ -285,9 +285,9 @@ struct GestaltView: View {
             }
             .onAppear {
                 store.mgCurrentDict = mgLoadData()
-                let isWritable = fm.isWritableFile(atPath: currentGestaltURL.path)
+                let isWritable = fm.isWritableFile(atPath: MGURL.fsGestaltURL.path)
                 if !isWritable {
-                    let res = BadQuery().grantAccess(atPath: currentGestaltURL.deletingLastPathComponent().path, toFileName: "com.apple.MobileGestalt.plist")
+                    let res = BadQuery().grantAccess(atPath: MGURL.fsGestaltURL.deletingLastPathComponent().path, toFileName: "com.apple.MobileGestalt.plist")
                     if !res.0 {
                         Alertinator.shared.alert(title: "Failed to get write access to MobileGestalt!", body: "Tweaks will NOT apply. Maybe try restarting the app?")
                     }
@@ -298,38 +298,38 @@ struct GestaltView: View {
     
     private func mgLoadData() -> NSMutableDictionary {
         do {
-            let mgData = try Data(contentsOf: currentGestaltURL)
-            if !fm.fileExists(atPath: ogGestaltSavedURL.path) {
-                try mgData.write(to: ogGestaltSavedURL)
+            let mgData = try Data(contentsOf: MGURL.fsGestaltURL)
+            if !fm.fileExists(atPath: MGURL.savedGestaltURL.path) {
+                try mgData.write(to: MGURL.savedGestaltURL)
             }
             
-            if let ogDict = NSDictionary(contentsOf: ogGestaltSavedURL),
+            if let ogDict = NSDictionary(contentsOf: MGURL.savedGestaltURL),
                let ogCacheExtra = ogDict["CacheExtra"] as? NSDictionary,
-               let ogArtwork = ogCacheExtra["oPeik/9e8lQWMszEjbPzng"] as? NSDictionary {
+               let ogArtwork = ogCacheExtra[MGKey.artwork] as? NSDictionary {
                 mgOgSubtype = ogArtwork["ArtworkDeviceSubType"] as? Int ?? 0
                 mgOgDeviceName = ogArtwork["ArtworkDeviceProductDescription"] as? String ?? ""
             } else {
                 throw "failed to get information from mobilegestalt"
             }
             
-            guard let currentDict = NSMutableDictionary(contentsOf: currentGestaltURL) else {
+            guard let currentDict = NSMutableDictionary(contentsOf: MGURL.fsGestaltURL) else {
                 throw "failed to get nsmutabledictionary from mobilegestalt"
             }
             
             if let cacheExtra = currentDict["CacheExtra"] as? NSDictionary,
-               let artwork = cacheExtra["oPeik/9e8lQWMszEjbPzng"] as? NSDictionary {
+               let artwork = cacheExtra[MGKey.artwork] as? NSDictionary {
                 mgSubtype = artwork["ArtworkDeviceSubType"] as? Int ?? 0
                 mgDeviceName = artwork["ArtworkDeviceProductDescription"] as? String ?? ""
                 if mgDeviceName != mgOgDeviceName {
                     mgEnableDeviceName = true
                 }
-                mgProductType = cacheExtra["h9jDsbgj7xIVeIQ8S3/X3Q"] as? String ?? machineName()
+                mgProductType = cacheExtra[MGKey.prodType] as? String ?? machineName()
             }
             
             return currentDict
         } catch {
             print("[!] failed to get mobilegestalt: \(error)")
-            Alertinator.shared.alert(title: "Failed to get MobileGestalt!", body: "Error: \(error).\n\nThis is really bad. Do NOT apply anything!")
+            Alertinator.shared.alert(title: "Failed to get MobileGestalt!", body: "Tweaks will not work properly. Please leave this page", showCancel: false, actionLabel: "Exit", action: { dismiss() })
         }
         
         return [:]
@@ -340,12 +340,12 @@ struct GestaltView: View {
             let mgDictToApply = store.mgCurrentDict
             
             if let cacheExtra = mgDictToApply["CacheExtra"] as? NSMutableDictionary,
-               let artwork = cacheExtra["oPeik/9e8lQWMszEjbPzng"] as? NSMutableDictionary {
+               let artwork = cacheExtra[MGKey.artwork] as? NSMutableDictionary {
                 artwork["ArtworkDeviceSubType"] = mgSubtype
                 if mgEnableDeviceName {
                     artwork["ArtworkDeviceProductDescription"] = mgDeviceName
                 }
-                cacheExtra["h9jDsbgj7xIVeIQ8S3/X3Q"] = mgProductType
+                cacheExtra[MGKey.prodType] = mgProductType
             } else {
                 throw "failed to write keys to mobilegestalt!"
             }
@@ -370,7 +370,7 @@ struct GestaltView: View {
     
     private func mgRevert() {
         do {
-            guard let mgDictToApply = NSMutableDictionary(contentsOf: ogGestaltSavedURL) else {
+            guard let mgDictToApply = NSMutableDictionary(contentsOf: MGURL.savedGestaltURL) else {
                 throw "failed to get mobilegestalt dict!"
             }
             
