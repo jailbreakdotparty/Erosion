@@ -19,7 +19,6 @@ let build = "Release"
 
 enum AppURL {
     static let pb = URL.documentsDirectory.appendingPathComponent("PosterBoard")
-    static let symlinks = AppURL.pb.appendingPathComponent("Symlinks")
     static let pbFolders = AppURL.pb.appendingPathComponent("Wallpapers")
 }
 
@@ -31,14 +30,9 @@ final class ErosionManager: ObservableObject {
     init() {}
 }
 
-enum AppTabs {
-    case home, tweaks, wallpapers
-}
-
 @main
 struct ErosionApp: App {
     @StateObject private var mgr = ErosionManager.shared
-    @State private var currentTab = AppTabs.home
     
     init() {
         setvbuf(stdout, nil, _IONBF, 0)

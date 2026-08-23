@@ -22,12 +22,13 @@ struct ContentView: View {
                 } header: {
                     HeaderLabel(text: "Version 0.1 (\(build))", icon: "info.circle")
                 } footer: {
-                    Text("Made with spite by lunginspector using the [bad_query](https://gist.github.com/lunginspector/10d2fe2a244175562a3f665f1cf2366f) exploit. This project was made under [jailbreak.party](https://jailbreak.party/).")
+                    Text("Made with love by the [jailbreak.party](https://jailbreak.party/) team. Thanks to forcequitOS for the [bad_query](https://github.com/forcequitOS/bad_query) sandbox escape that this app relies on.")
                 }
                 
                 Section {
                     if mgSupported() || weOnADebugBuild {
                         NavigationLink("MobileGestalt", destination: GestaltView())
+                        NavigationLink("Config Tweaks", destination: ConfigView())
                     }
                     NavigationLink("Custom Wallpapers", destination: PosterBoardView())
                     NavigationLink("File Operations", destination: OperationsView())

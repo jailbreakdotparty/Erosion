@@ -26,7 +26,7 @@ struct SettingsView: View {
                         .navigationTitle("Credits")
                     }
                 } footer: {
-                    Text("Made with love by lunginspector for the [jailbreak.party](https://jailbreak.party) team.\nJoin the [jailbreak.party](https://jailbreak.party/discord) Discord!")
+                    Text("Made with love by the [jailbreak.party](https://jailbreak.party) team.\nJoin the [jailbreak.party](https://jailbreak.party/discord) Discord!")
                 }
                 
                 Section {

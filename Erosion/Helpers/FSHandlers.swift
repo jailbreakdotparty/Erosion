@@ -41,11 +41,4 @@ class FSHandlers {
         print("(fs) failed to get posterboard container!")
         return ""
     }
-    
-    func openInFilesApp(_ fileURL: URL) {
-        guard var components = URLComponents(url: fileURL, resolvingAgainstBaseURL: false) else { return }
-        components.scheme = "shareddocuments"
-        guard let filesAppURL = components.url else { return }
-        UIApplication.shared.open(filesAppURL)
-    }
 }

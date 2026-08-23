@@ -228,7 +228,7 @@ struct PosterBoardView: View {
                     
                     @MainActor
                     func proceed() {
-                        let res = applyObjects(tendiesArray.filter { $0.isOn }, at: AppURL.symlinks)
+                        let res = applyObjects(tendiesArray.filter { $0.isOn })
                         if !res {
                             Alertinator.shared.alert(title: "Failed to apply wallpapers!", body: PBMsg.corruption)
                         } else {
@@ -263,7 +263,7 @@ struct PosterBoardView: View {
         }
     }
     
-    private func applyObjects(_ objects: [TendiesObject], at url: URL) -> Bool {
+    private func applyObjects(_ objects: [TendiesObject]) -> Bool {
         let descrTargets = Set(objects.map(\.targetDescr))
         for descrTarget in descrTargets {
             let target = "\(pbContainerPath)/\(descrTarget.path)"
