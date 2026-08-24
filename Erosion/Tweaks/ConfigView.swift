@@ -19,7 +19,8 @@ enum CNURL {
 }
 
 enum CNMsg {
-    static var supWarning = "If you're using this tweak and your device is already MDM-configured, do NOT touch this toggle! Also, and this goes for all users, you may see a setup screen after respringing. This tweak could result in data loss."
+    static var supWarning = "If you're using this tweak and your device is already MDM-configured, do NOT touch this toggle! Also, and this goes for all users, you may see a setup screen after respringing. Use at your own risk."
+    static var resetInfo = "By clicking \"Confirm\", your footnote will be removed and your device will be unsupervised."
 }
 
 struct ConfigView: View {
@@ -88,22 +89,36 @@ struct ConfigView: View {
             .navigationTitle("Configurations")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Apply") {
+                    Button {
+                        if showTips {
+                            Alertinator.shared.alert(title: "Are you sure you'd like to reset your tweaks?", body: CNMsg.resetInfo, actionLabel: "Confirm", action: {
+                                reset()
+                            })
+                        } else {
+                            reset()
+                        }
+                    } label: {
+                        Label("Restore Tweaks", systemImage: "gobackward")
+                            .labelStyle(.iconOnly)
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Apply", role: .adaptiveConfirm) {
                         apply()
                     }
                 }
             }
             .onAppear {
-                doSetupStuff()
+                doSetup()
             }
         }
     }
     
-    private func doSetupStuff() {
+    private func doSetup() {
         if !fm.isWritableFile(atPath: CNURL.sharedDevConfig.path) {
             let res = bq.grantAccess(atPath: FSURL.configProfiles.path)
             if !res.0 {
-                Alertinator.shared.alert(title: "Failed to get write access!", body: "")
+                Alertinator.shared.alert(title: "Failed to get write access!", body: AppMsg.opFailed)
                 return
             }
         }
@@ -114,9 +129,13 @@ struct ConfigView: View {
                 try data.write(to: CNURL.sharedDevConfig)
             } catch {
                 print("(ft) failed to create footnote file: \(error)")
-                Alertinator.shared.alert(title: "Failed to create footnote file!", body: "")
+                Alertinator.shared.alert(title: "Failed to create footnote file!", body: AppMsg.opFailed)
             }
         }
+        loadData()
+    }
+    
+    private func loadData() {
         if let ftDict = NSMutableDictionary(contentsOf: CNURL.sharedDevConfig) {
             ftCurrentDict = ftDict
             footnoteText = ftDict["LockScreenFootnote"] as? String ?? ""
@@ -140,11 +159,29 @@ struct ConfigView: View {
             print("(cn) successfully applied config tweaks!")
             Haptic.shared.play(.soft)
             if showTips {
-                Alertinator.shared.alert(title: "Successfully appiled config tweaks!", body: "Respring your device for changes to take affect.", actionLabel: "Respring", action: { mgr.shouldRespring = true })
+                Alertinator.shared.alert(title: "Successfully appiled config tweaks!", body: AppMsg.applied, actionLabel: "Respring", action: { mgr.shouldRespring = true })
             }
         } catch {
             print("(cn) failed to write config files: \(error)")
-            Alertinator.shared.alert(title: "Failed to apply tweaks!", body: "")
+            Alertinator.shared.alert(title: "Failed to apply tweaks!", body: AppMsg.opFailed)
+        }
+    }
+    
+    private func reset() {
+        ccCurrentDict["IsSupervised"] = false
+        ccCurrentDict.removeObject(forKey: "OrganizationName")
+        do {
+            try fm.removeItem(at: CNURL.sharedDevConfig)
+            let ccData = try PropertyListSerialization.data(fromPropertyList: ccCurrentDict, format: .binary, options: 0)
+            try ccData.write(to: CNURL.cloudConfig)
+            print("(cn) successfully reset config tweaks!")
+            Haptic.shared.play(.soft)
+            if showTips {
+                Alertinator.shared.alert(title: "Successfully reset config tweaks!", body: AppMsg.applied, actionLabel: "Respring", action: { mgr.shouldRespring = true })
+            }
+        } catch {
+            print("(cn) failed to reset config files: \(error)")
+            Alertinator.shared.alert(title: "Failed to reset tweaks!", body: AppMsg.opFailed)
         }
     }
 }

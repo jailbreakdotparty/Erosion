@@ -15,20 +15,6 @@ let fm = FileManager.default
 var weOnADebugBuild = false
 var pipe = Pipe()
 var sema = DispatchSemaphore(value: 0)
-let build = "Release"
-
-enum AppURL {
-    static let pb = URL.documentsDirectory.appendingPathComponent("PosterBoard")
-    static let pbFolders = AppURL.pb.appendingPathComponent("Wallpapers")
-}
-
-final class ErosionManager: ObservableObject {
-    static let shared = ErosionManager()
-    @Published var logOutput = ""
-    @Published var shouldRespring = false
-    
-    init() {}
-}
 
 @main
 struct ErosionApp: App {

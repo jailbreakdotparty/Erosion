@@ -29,6 +29,9 @@ enum MGMsg {
     static let subtype = "Only change your subtype if you'd like to move the dynamic island down to a lower position. Enable the dynamic island using the toggle further down this page!"
     static let mgResetComp = "To complete the reset, you'll need to reboot your iPhone. Please do this now."
 
+    // settings
+    static let mgResetSavWarn = "Before you save MobileGestalt, remove all tweaks so that they don't get re-applied if you ever want to reset your actual gestalt again."
+    static let hidTweakWarn = "By showing tweaks that are intentionally hidden on your specific device configuration, you may be able to enable features that could break your device or lead to data loss!"
 }
 
 enum MGKey {

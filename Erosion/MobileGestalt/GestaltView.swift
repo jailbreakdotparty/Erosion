@@ -24,7 +24,8 @@ struct GestaltView: View {
     @State private var mgOgDeviceName = ""
     @State private var mgEnableDeviceName = false
     @AppStorage("mgDeviceName") private var mgDeviceName = ""
-    @AppStorage("ogMachineName") var ogMachineName = ""
+    @AppStorage("ogMachineName") private var ogMachineName = ""
+    @AppStorage("showRegionTweak") private var showRegionTweak = false
     @State private var mgProductType = ""
     
     @State private var showInfoSheet = false
@@ -103,7 +104,9 @@ struct GestaltView: View {
                 
                 Section {
                     PlainToggle(text: "Enable SRD UI", minSupportedVersion: 26.0, isOn: store.mgKeyBinding([MGKey.srd]))
-                    PlainToggle(text: "Disable Region Restrictions", isOn: store.mgRegionRestrictionsBinding())
+                    if showRegionTweak {
+                        PlainToggle(text: "Disable Region Restrictions", isOn: store.mgRegionRestrictionsBinding())
+                    }
                     if !isAppleIntellHD() || mgOverrideGates {
                         PlainToggle(text: "Enable Apple Intelligence", minSupportedVersion: 18.1, isOn: store.mgKeyBinding([MGKey.appIntell]))
                             .onChange(of: store.mgKeyBinding([MGKey.appIntell]).wrappedValue) { (oldVal, newVal) in
@@ -222,7 +225,7 @@ struct GestaltView: View {
                                         presentShareSheet(with: MGURL.savedGestaltURL)
                                     }
                                     Button("Reset Saved Gestalt", role: .destructive) {
-                                        Alertinator.shared.alert(title: "Warning!", body: "Before you save MobileGestalt, remove all tweaks so that they don't get re-applied if you ever want to reset again.", action: {
+                                        Alertinator.shared.alert(title: "Warning!", body: MGMsg.mgResetSavWarn, action: {
                                             try? fm.removeItem(at: MGURL.savedGestaltURL)
                                             let _ = mgLoadData()
                                         })
@@ -232,7 +235,7 @@ struct GestaltView: View {
                                 }
                                 
                                 Section {
-                                    PlainToggle(text: "Show Hidden Tweaks", infoType: .warning, infoMessage: "By showing tweaks that are intentionally hidden on your specific device configuration, you may be able to enable features that could break your device or lead to data loss!", isOn: $mgOverrideGates)
+                                    PlainToggle(text: "Show Hidden Tweaks", infoType: .warning, infoMessage: MGMsg.hidTweakWarn, isOn: $mgOverrideGates)
                                     Toggle("Respring after Apply", isOn: $mgAutoRespring)
                                     Toggle("Overwrite Atomically", isOn: $mgWriteAtomically)
                                 } footer: {
@@ -313,6 +316,9 @@ struct GestaltView: View {
             let mgData = try Data(contentsOf: MGURL.fsGestaltURL)
             if !fm.fileExists(atPath: MGURL.savedGestaltURL.path) {
                 try mgData.write(to: MGURL.savedGestaltURL)
+                if let locale = Locale.current.region?.identifier {
+                    showRegionTweak = locale != "US"
+                }
             }
             
             if let ogDict = NSDictionary(contentsOf: MGURL.savedGestaltURL),
@@ -376,7 +382,7 @@ struct GestaltView: View {
             }
             
             if showTips {
-                Alertinator.shared.alert(title: "Successfully appiled MobileGestalt tweaks!", body: "Respring your device for changes to appear." + (store.isEnabled([MGKey.appIntell]) ? " You'll have to reboot your device if you want to use Apple Intelligence." : ""), actionLabel: "Respring", action: { mgr.shouldRespring = true })
+                Alertinator.shared.alert(title: "Successfully appiled MobileGestalt tweaks!", body: AppMsg.applied + (store.isEnabled([MGKey.appIntell]) ? " You'll have to reboot your device if you want to use Apple Intelligence." : ""), actionLabel: "Respring", action: { mgr.shouldRespring = true })
             }
         } catch {
             print("[!] failed to apply mobilegestalt: \(error)")
@@ -401,7 +407,7 @@ struct GestaltView: View {
             }
         } catch {
             print("[!] failed to revert mobilegestalt: \(error)")
-            Alertinator.shared.alert(title: "Failed to revert MobileGestalt!", body: "Error: \(error)")
+            Alertinator.shared.alert(title: "Failed to revert MobileGestalt!", body: AppMsg.opFailed)
         }
     }
 }

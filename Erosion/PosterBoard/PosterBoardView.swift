@@ -108,6 +108,13 @@ struct PosterBoardView: View {
                                 }
                         }
                         .contextMenu {
+                            Button {
+                                let url = AppURL.pbFolders.appendingPathComponent(tendies.folderName)
+                                fsHandlers.openInFilesApp(url)
+                            } label: {
+                                Label("Show Data Folder", systemImage: "folder")
+                            }
+                            
                             Button(role: .destructive) {
                                 withAnimation {
                                     let url = AppURL.pbFolders.appendingPathComponent(tendies.folderName)
@@ -253,11 +260,17 @@ struct PosterBoardView: View {
     private func doSetupStuff() {
         DispatchQueue.global(qos: .userInitiated).async {
             if pbContainerPath.isEmpty {
-                pbContainerPath = FSHandlers().getPBContainer()
+                pbContainerPath = fsHandlers.getPBContainer()
             }
             if !fm.fileExists(atPath: AppURL.pb.path) {
-                try? fm.createDirIfNeeded(at: AppURL.pb)
-                try? fm.createDirIfNeeded(at: AppURL.pbFolders)
+                do {
+                    try fm.createDirIfNeeded(at: AppURL.pb)
+                    try fm.createDirIfNeeded(at: AppURL.pbFolders)
+                } catch {
+                    Task {
+                        await Alertinator.shared.alert(title: "Failed to setup PosterBoard tweaks!", body: AppMsg.opFailed)
+                    }
+                }
             }
             isReady = true
         }
