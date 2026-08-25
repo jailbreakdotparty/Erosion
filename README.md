@@ -11,6 +11,8 @@
 >[!WARNING]
 >If a tweak does not work on your device, **do not ask us for any support regarding it!** Many of tweaks are reliant on your device, and not our tool, cooperating properly. In some cases this can even involve Apple's servers. We will be unable to help you if a tweak does not give you the behavior you're hoping for. **Use all of these own tweaks at your own risk, and have a backup please!**
 
+> If you've used any other toolboxes before this one, such as mond or Nugget, it's recommended that you reset your MobileGestalt tweaks on those tools before using this one.
+
 ## Supported Versions
 >[!NOTE]
 >If your version doesn't show up on this list, your device is not supported. **Do not ask us for any support regarding extending version support!** Exploits that apps like these rely on are very rare to come by, so there's nothing we can do if your device isn't supported.
