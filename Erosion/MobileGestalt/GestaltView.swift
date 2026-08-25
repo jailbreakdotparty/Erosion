@@ -204,9 +204,11 @@ struct GestaltView: View {
                                 do {
                                     try fm.removeItem(at: MGURL.savedGestaltURL)
                                     try fm.removeItem(at: MGURL.fsGestaltURL)
+                                    store.mgCurrentDict = NSMutableDictionary()
                                     Alertinator.shared.alert(title: "Successfully reset MobileGestalt!", body: MGMsg.mgResetComp, showCancel: false, actionLabel: "Exit App", action: { exitinator() })
                                 } catch {
                                     print("(mg) failed to reset mobilegestalt: \(error)")
+                                    Alertinator.shared.alert(title: "Failed to reset MobileGestalt!", body: AppMsg.opFailed)
                                 }
                             })
                         } label: {
@@ -275,7 +277,7 @@ struct GestaltView: View {
                                 showInfoSheet = false
                                 hasShownSheet = true
                                 idiotButtonTimerComplete = false
-                                mgApply()
+                                mgApply(isFromSheet: true)
                             }
                             .buttonStyle(ConfirmButtonStyle())
                             .padding(.horizontal, 30)
@@ -347,13 +349,14 @@ struct GestaltView: View {
             return currentDict
         } catch {
             print("[!] failed to get mobilegestalt: \(error)")
-            Alertinator.shared.alert(title: "Failed to get MobileGestalt!", body: "Tweaks will not work properly. Please leave this page", showCancel: false, actionLabel: "Exit", action: { dismiss() })
+            Haptic.shared.play(.heavy)
+            Alertinator.shared.alert(title: "Failed to get MobileGestalt!", body: "Tweaks will not work properly. Please leave this page.", showCancel: false, actionLabel: "Exit", action: { dismiss() })
         }
         
         return [:]
     }
     
-    private func mgApply() {
+    private func mgApply(isFromSheet: Bool = false) {
         do {
             let mgDictToApply = store.mgCurrentDict
             
@@ -374,15 +377,15 @@ struct GestaltView: View {
             if res {
                 print("[*] successfully overwrote mobilegestalt!")
                 Haptic.shared.play(.soft)
-                if mgAutoRespring {
+                if mgAutoRespring || isFromSheet {
                     mgr.shouldRespring = true
+                } else {
+                    if showTips {
+                        Alertinator.shared.alert(title: "Successfully appiled MobileGestalt tweaks!", body: AppMsg.applied + (store.isEnabled([MGKey.appIntell]) ? " You'll have to reboot your device if you want to use Apple Intelligence." : ""), actionLabel: "Respring", action: { mgr.shouldRespring = true })
+                    }
                 }
             } else {
                 throw "overwrite failed!"
-            }
-            
-            if showTips {
-                Alertinator.shared.alert(title: "Successfully appiled MobileGestalt tweaks!", body: AppMsg.applied + (store.isEnabled([MGKey.appIntell]) ? " You'll have to reboot your device if you want to use Apple Intelligence." : ""), actionLabel: "Respring", action: { mgr.shouldRespring = true })
             }
         } catch {
             print("[!] failed to apply mobilegestalt: \(error)")
@@ -402,6 +405,12 @@ struct GestaltView: View {
             if res {
                 print("[*] successfully overwrote mobilegestalt!")
                 Haptic.shared.play(.soft)
+                if let dict = NSMutableDictionary(contentsOf: MGURL.savedGestaltURL) {
+                    store.mgCurrentDict = dict
+                }
+                if showTips {
+                    Alertinator.shared.alert(title: "Successfully reverted MobileGestalt tweaks!", body: MGMsg.revertComp)
+                }
             } else {
                 throw "overwrite failed!"
             }

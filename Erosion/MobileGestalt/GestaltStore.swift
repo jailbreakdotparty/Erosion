@@ -19,7 +19,7 @@ enum MGMsg {
     static let region = "Enabling this tweak may break regional laws! You could face legal action from your local jurisdiction. Use at your own risk."
     static let ipadOS = "If you're using an alphanumeric passcode, do not use this tweak at all. Do not turn off \"Show Dock In Stage Manager\" or your device will get softbricked. When this tweak is enabled, expect general instability, unusable apps, and broken device features."
     static let support = "Do not ask us for support if a tweak does not work properly. Many of these tweaks are dependent on your device or Apple's servers cooperating. Use all of these tweaks at your own risk."
-    static let mgReset = "Resetting MobileGestalt involves deleting the original cache. This may cause data loss."
+    static let mgReset = "Resetting MobileGestalt involves deleting the original cache. This'll help you remove tweaks that aren't reverting, but there is a rare chance that your device will get softbricked."
     
     // info
     static let intInstall = "This will enable some internal features that were meant for Apple Internal use but were left in production iOS. This tweak may break some device functionality, including installing system apps from the App Store."
@@ -28,6 +28,7 @@ enum MGMsg {
     static let spoofAI = "This tweak does not enable the new Siri AI features. To download AI models, you'll need to spoof your device. Spoofing your device model may break Face ID as well as other features. If you unspoof, do not go back into the Siri section inside of settings."
     static let subtype = "Only change your subtype if you'd like to move the dynamic island down to a lower position. Enable the dynamic island using the toggle further down this page!"
     static let mgResetComp = "To complete the reset, you'll need to reboot your iPhone. Please do this now."
+    static let revertComp = "It's recommended that you reboot so that all tweaks can revert."
 
     // settings
     static let mgResetSavWarn = "Before you save MobileGestalt, remove all tweaks so that they don't get re-applied if you ever want to reset your actual gestalt again."

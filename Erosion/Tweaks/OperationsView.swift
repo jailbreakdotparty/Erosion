@@ -9,8 +9,6 @@ import SwiftUI
 import UniformTypeIdentifiers
 import PartyUI
 
-let bq = BadQuery()
-
 struct OperationsView: View {
     @State private var directory = ""
     @State private var fileName = ""
@@ -31,7 +29,7 @@ struct OperationsView: View {
                     Button("Grant Access") {
                         let res = bq.grantAccess(atPath: directory, toFileName: fileName)
                         if !res.0 {
-                            Alertinator.shared.alert(title: "Failed to get access to target file!", body: "Error \(res.1): \(res.2)")
+                            Alertinator.shared.alert(title: "Failed to get access to target file!", body: "\(res.1): \(res.2)")
                         } else {
                             isAcc = true
                         }
