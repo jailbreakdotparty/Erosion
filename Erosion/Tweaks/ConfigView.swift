@@ -25,7 +25,7 @@ enum CNMsg {
 
 struct ConfigView: View {
     @EnvironmentObject private var mgr: ErosionManager
-    @AppStorage("showTips") private var showTips = false
+    @AppStorage("showTips") private var showTips = true
     @State private var ftCurrentDict = NSMutableDictionary()
     @State private var ccCurrentDict = NSMutableDictionary()
     @State private var footnoteText = ""
@@ -176,6 +176,8 @@ struct ConfigView: View {
             try ccData.write(to: CNURL.cloudConfig)
             print("(cn) successfully reset config tweaks!")
             Haptic.shared.play(.soft)
+            loadData()
+            footnoteText = ""
             if showTips {
                 Alertinator.shared.alert(title: "Successfully reset config tweaks!", body: AppMsg.applied, actionLabel: "Respring", action: { mgr.shouldRespring = true })
             }

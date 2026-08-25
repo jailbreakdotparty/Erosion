@@ -39,15 +39,10 @@ struct ContentView: View {
             .navigationTitle("Erosion")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Menu {
-                        Text("\(machineName()) • \(device.systemName) \(device.systemVersion) (\(buildNumber()))")
-                        Button {
-                            mgr.shouldRespring = true
-                        } label: {
-                            Label("Respring", systemImage: "goforward")
-                        }
+                    Button {
+                        mgr.shouldRespring = true
                     } label: {
-                        Label("Menu", systemImage: "ellipsis")
+                        Label("Respring", systemImage: "goforward")
                             .labelStyle(.iconOnly)
                     }
                 }

@@ -214,6 +214,7 @@ struct PosterBoardView: View {
                     } label: {
                         Label("Settings", systemImage: "gearshape")
                     }
+                    .disabled(!isReady)
                 } label: {
                     Image(systemName: "ellipsis")
                 }
