@@ -3,6 +3,7 @@
   <p>A collection of customization tweaks that use the <a href="https://github.com/forcequitOS/bad_query">bad_query</a> sandbox escape.</p>
   <p>iOS 26.0 - iOS 26.6.1 & iOS 27.0db1-db4</p>
   <p><a href="https://jailbreak.party">Website</a> • <a href="https://jailbreak.party/discord">Discord</a> • <a href="https://x.com/jbdotparty">Twitter</a></p>
+  <p>PLEASE READ THE README BEFORE ASKING FOR SUPPORT!!!</p>
   <a href="https://github.com/jailbreakdotparty/Erosion/stargazers">
     <img src="https://img.shields.io/github/stars/jailbreakdotparty/Erosion?style=social" alt="GitHub stars">
   </a>
