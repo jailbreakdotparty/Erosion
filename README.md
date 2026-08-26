@@ -1,7 +1,7 @@
 <div align="center">
   <h1>Erosion</h1>
-  <p>A collection of customization tweaks that use the <a href="https://github.com/forcequitOS/bad_query">bad_query</a> sandbox escape.</p>
-  <p>iOS 26.0 - iOS 26.6.1 & iOS 27.0db1-db4</p>
+  <p>iOS customization toolbox using the <a href="https://github.com/forcequitOS/bad_query">bad_query</a> sandbox escape.</p>
+  <p>Supports iOS 26.0 - iOS 26.6.1 & iOS 27.0db1-db4.</p>
   <p><a href="https://jailbreak.party">Website</a> • <a href="https://jailbreak.party/discord">Discord</a> • <a href="https://x.com/jbdotparty">Twitter</a></p>
   <p>PLEASE READ THE README BEFORE ASKING FOR SUPPORT!!!</p>
   <a href="https://github.com/jailbreakdotparty/Erosion/stargazers">
