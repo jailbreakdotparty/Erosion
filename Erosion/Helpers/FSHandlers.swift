@@ -8,10 +8,6 @@
 import Foundation
 import UIKit
 
-enum FSPaths {
-    static let appContainers = "/var/mobile/Containers/Data/Application"
-}
-
 let fsHandlers = FSHandlers()
 
 class FSHandlers {

@@ -50,3 +50,9 @@ extension ButtonRole {
     }
 }
 
+func isSolariumUI() -> Bool {
+    if #available(iOS 19.0, *) {
+        return true
+    }
+    return false
+}

@@ -8,11 +8,6 @@
 import SwiftUI
 import PartyUI
 
-enum FSURL {
-    static var sysGroup = URL(fileURLWithPath: "/private/var/containers/Shared/SystemGroup")
-    static var configProfiles = FSURL.sysGroup.appendingPathComponent("systemgroup.com.apple.configurationprofiles/Library/ConfigurationProfiles")
-}
-
 enum CNURL {
     static var sharedDevConfig = FSURL.configProfiles.appendingPathComponent("SharedDeviceConfiguration.plist")
     static var cloudConfig = FSURL.configProfiles.appendingPathComponent("CloudConfigurationDetails.plist")

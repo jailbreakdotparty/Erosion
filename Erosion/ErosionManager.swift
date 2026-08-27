@@ -10,6 +10,10 @@ import Combine
 
 let build = "Release"
 
+enum Errors {
+    static var checkLogs = "Check error logs for more detailed information."
+}
+
 enum AppURL {
     static let pb = URL.documentsDirectory.appendingPathComponent("PosterBoard")
     static let pbFolders = AppURL.pb.appendingPathComponent("Wallpapers")
@@ -25,6 +29,7 @@ final class ErosionManager: ObservableObject {
     static let shared = ErosionManager()
     @Published var logOutput = ""
     @Published var shouldRespring = false
+    @Published var refreshFiles = false
     
     init() {}
 }

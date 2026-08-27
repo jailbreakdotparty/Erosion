@@ -9,7 +9,7 @@ import Foundation
 import PartyUI
 
 // version support for different functions
-func mgSupported() -> Bool {
+func raveSupported() -> Bool {
     let buildNum = buildNumber()
     if doubleSystemVersion() == 27.0 && (buildNum == "24A5355q" || buildNum == "24A5370h" || buildNum == "24A5380h" || buildNum == "24A5390f") {
         return true
@@ -18,7 +18,7 @@ func mgSupported() -> Bool {
 }
 
 func isSupported() -> Bool {
-    if (doubleSystemVersion() >= 19.0 && doubleSystemVersion() < 27.0) || mgSupported() {
+    if (doubleSystemVersion() >= 19.0 && doubleSystemVersion() < 27.0) || raveSupported() {
         return true
     }
     return false

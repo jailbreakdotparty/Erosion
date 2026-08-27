@@ -147,6 +147,7 @@ struct PosterBoardView: View {
                 }
                 .buttonStyle(ActionButtonStyle())
                 .frame(maxWidth: .infinity)
+                .padding(device.userInterfaceIdiom == .pad ? 0 : 15)
             }
         }
         .toolbar {
