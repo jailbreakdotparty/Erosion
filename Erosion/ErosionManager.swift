@@ -17,6 +17,7 @@ enum Errors {
 enum AppURL {
     static let pb = URL.documentsDirectory.appendingPathComponent("PosterBoard")
     static let pbFolders = AppURL.pb.appendingPathComponent("Wallpapers")
+    static let ps = URL.documentsDirectory.appendingPathComponent("Passcode Themes")
 }
 
 enum AppMsg {

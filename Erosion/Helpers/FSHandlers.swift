@@ -25,18 +25,20 @@ class FSHandlers {
         return array
     }
     
-    func getPBContainer() -> String {
-        let containerPaths = getDirPaths(FSPaths.appContainers)
-        for path in containerPaths {
-            let files = getDirPaths("\(path)/Library/Application Support")
-            if !files.isEmpty {
-                let filtered = files.filter { $0.contains("PRBPosterExtensionDataStore") }
-                if !filtered.isEmpty {
-                    return path
+    func getContainerPath(at containerURL: URL = FSURL.appContainers, forMatch match: String, hashOnly: Bool = false) -> String {
+        let containers = getDirPaths(containerURL.path)
+        for path in containers {
+            let url = URL(fileURLWithPath: path)
+            if let appName = folderLabel(url: url) {
+                if appName == match {
+                    if hashOnly {
+                        return url.lastPathComponent
+                    }
+                    return url.path
                 }
             }
         }
-        print("(fs) failed to get posterboard container!")
+        print("(fs) failed to get container for \(match)! containers: \(containerURL.path)")
         return ""
     }
     

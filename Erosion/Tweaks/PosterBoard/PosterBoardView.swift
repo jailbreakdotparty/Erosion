@@ -262,7 +262,7 @@ struct PosterBoardView: View {
     private func doSetupStuff() {
         DispatchQueue.global(qos: .userInitiated).async {
             if pbContainerPath.isEmpty {
-                pbContainerPath = fsHandlers.getPBContainer()
+                pbContainerPath = fsHandlers.getContainerPath(forMatch: "com.apple.PosterBoard")
             }
             if !fm.fileExists(atPath: AppURL.pb.path) {
                 do {
