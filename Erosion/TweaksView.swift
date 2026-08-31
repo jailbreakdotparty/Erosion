@@ -6,17 +6,28 @@
 //
 
 import SwiftUI
+import PartyUI
 
 struct TweaksView: View {
     var body: some View {
         NavigationStack {
             List {
-                if raveSupported() || weOnADebugBuild {
-                    NavigationLink("MobileGestalt", destination: GestaltView())
-                    NavigationLink("Config Tweaks", destination: ConfigView())
+                Section {
+                    NavigationLink("Custom Wallpapers", destination: PosterBoardView())
+                    NavigationLink("Dialer Themer", destination: KeypadView())
+                } header: {
+                    HeaderLabel(text: "Theming", icon: "paintbrush")
                 }
-                NavigationLink("Custom Wallpapers", destination: PosterBoardView())
-                NavigationLink("File Operations", destination: OperationsView())
+                
+                Section {
+                    if raveSupported() || weOnADebugBuild {
+                        NavigationLink("MobileGestalt", destination: GestaltView())
+                        NavigationLink("Config Tweaks", destination: ConfigView())
+                    }
+                    NavigationLink("File Operations", destination: OperationsView())
+                } header: {
+                    HeaderLabel(text: "System", icon: "gear")
+                }
             }
             .navigationTitle("Tweaks")
         }
