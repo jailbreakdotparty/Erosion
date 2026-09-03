@@ -7,6 +7,7 @@
 
 import Foundation
 import PartyUI
+import UIKit
 
 // version support for different functions
 func raveSupported() -> Bool {
@@ -43,4 +44,8 @@ func buildNumber() -> String {
         return buildNum
     }
     return "Unknown"
+}
+
+func isPad() -> Bool {
+    return UIDevice.current.userInterfaceIdiom == .pad
 }

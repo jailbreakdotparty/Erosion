@@ -16,6 +16,7 @@ struct KeypadView: View {
     @State private var size: KPSize = KPSize.defSize
     @State private var custW = 0
     @State private var custH = 0
+    @State private var showFileImporter = false
     
     var body: some View {
         VStack(spacing: 16) {
@@ -58,17 +59,23 @@ struct KeypadView: View {
             .buttonStyle(KeypadButtonStyle(isConfirm: true))
             .frame(maxWidth: .infinity, alignment: .center)
         }
-        .padding(.horizontal, 30)
-        .navigationTitle("Dialer Themer")
+        .navigationTitle(isPad() ? "" : "Dialer Themer")
+        .frame(maxWidth: 325)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button {
-                        kpMgr.mpKeypad = emptyKeypadArray
+                        kpMgr.getCurrentKeypads(size: size, custW: custW, custH: custH, saveOgData: true)
                     } label: {
-                        Label("Clear Keys", systemImage: "trash")
+                        Label("Clear Keys", systemImage: "gobackward")
                     }
+                    Button {
+                        kpMgr.maskKeysIntoCircle(size: size, custW: custW, custH: custH)
+                    } label: {
+                        Label("Mask Keys", systemImage: "circle")
+                    }
+                    Divider()
                     Button(role: .destructive) {
                         Alertinator.shared.alert(title: "Are you sure you'd like to reset your set keys?", body: KPMsg.resetWarn, actionLabel: "Confirm", action: {
                             let res = kpMgr.resetKeypadItems()
@@ -90,7 +97,7 @@ struct KeypadView: View {
             ToolbarSpacer(placement: .topBarTrailing)
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Import") {
-                    
+                    showFileImporter = true
                 }
             }
         }
@@ -101,7 +108,10 @@ struct KeypadView: View {
             if !fm.isReadableFile(atPath: mpContainerPath) {
                 let _ = bq.grantAccess(atPath: mpContainerPath)
             }
-            kpMgr.getCurrentKeypads(size: size, isOnAppear: true)
+            kpMgr.getCurrentKeypads(size: size, saveOgData: true)
+        }
+        .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.item]) { result in
+            handleImport(result)
         }
     }
     
@@ -119,9 +129,10 @@ struct KeypadView: View {
                 showPicker = true
             } label: {
                 if let img = image {
+                    let denoVal: Float = isPad() ? 2.1 : 3.0
                     Image(uiImage: img)
                         .resizable()
-                        .frame(width: CGFloat(Float(img.size.width)/3), height: CGFloat(Float(img.size.height)/3))
+                        .frame(width: CGFloat(Float(img.size.width)/denoVal), height: CGFloat(Float(img.size.height)/denoVal))
                         .background {
                             Circle()
                                 .fill(Color.clear)
@@ -169,6 +180,34 @@ struct KeypadView: View {
             }
         }
     }
+    
+    // MARK: handle import
+    private func handleImport(_ result: Result<URL, Error>) {
+        switch result {
+        case .success(let fileURL):
+            do {
+                let stopAccess = fileURL.startAccessingSecurityScopedResource()
+                defer {
+                    if stopAccess {
+                        fileURL.stopAccessingSecurityScopedResource()
+                    }
+                }
+                let res = kpMgr.importTheme(fromURL: fileURL)
+                if res {
+                    Haptic.shared.play(.soft)
+                } else {
+                    throw "failed to import theme!"
+                }
+            } catch {
+                print("(kp) failed to import theme: \(error)")
+                Alertinator.shared.alert(title: "Failed to import file!", body: AppMsg.opFailed)
+            }
+        case .failure(let error):
+            print("(fm) failed to import file: \(error)")
+            Alertinator.shared.alert(title: "Failed to import file!", body: "\(error)")
+        }
+    }
+    
 }
 
 // MARK: UI

@@ -10,11 +10,6 @@ import Foundation
 import UIKit
 import ZIPFoundation
 
-/*
- TelephonyUI-10:
- -
- */
-
 // i hate you, apple incorporated.
 // with love, lunginspector. august 28th, 2026.
 enum KeypadID: String, CaseIterable {
@@ -22,24 +17,24 @@ enum KeypadID: String, CaseIterable {
     
     var fileNames: [String] {
         switch self {
-        case .one: return getFileNames(forKey: "en-1-")
-        case .two: return getFileNames(forKey: "en-2-A B C")
-        case .three: return getFileNames(forKey: "en-3-D E F")
-        case .four: return getFileNames(forKey: "en-4-G H I")
-        case .five: return getFileNames(forKey: "en-5-J K L")
-        case .six: return getFileNames(forKey: "en-6-M N O")
-        case .seven: return getFileNames(forKey: "en-7-P Q R S")
-        case .eight: return getFileNames(forKey: "en-8-T U V")
-        case .nine: return getFileNames(forKey: "en-9-W X Y Z")
-        case .star: return getFileNames(forKey: "en-*-")
-        case .zero: return getFileNames(forKey: "en-0-+")
-        case .pound: return getFileNames(forKey: "en-#-")
+        case .one: return getFileNames(forKey: "-1-")
+        case .two: return getFileNames(forKey: "-2-A B C")
+        case .three: return getFileNames(forKey: "-3-D E F")
+        case .four: return getFileNames(forKey: "-4-G H I")
+        case .five: return getFileNames(forKey: "-5-J K L")
+        case .six: return getFileNames(forKey: "-6-M N O")
+        case .seven: return getFileNames(forKey: "-7-P Q R S")
+        case .eight: return getFileNames(forKey: "-8-T U V")
+        case .nine: return getFileNames(forKey: "-9-W X Y Z")
+        case .star: return getFileNames(forKey: "-*-")
+        case .zero: return getFileNames(forKey: "-0-+")
+        case .pound: return getFileNames(forKey: "-#-")
         }
     }
     
     private func getFileNames(forKey key: String) -> [String] {
-        let files = ["--mask.png", "--white.png", "-hi-mask.png", "-hi-white.png"]
-        return files.map { key + $0 }
+        let files = ["--mask.png", "--white.png", "-hi-mask.png", "-hi-white.png", "--white-bold.png", "--mask-bold.png"]
+        return files.map { kp.getFileRegCode() + key + $0 }
     }
     
     func getAccentedFileName() -> String {
@@ -53,12 +48,13 @@ enum KeypadID: String, CaseIterable {
 }
 
 enum KPSize: Int, CaseIterable {
-    case defSize, small, big, custom
+    case defSize, small, medium, large, custom
     
     var float: CGFloat {
         switch self {
         case .small: return CGFloat(150)
-        case .big: return CGFloat(225)
+        case .medium: return CGFloat(205)
+        case .large: return CGFloat(225)
         default: return CGFloat(0)
         }
     }
@@ -67,7 +63,8 @@ enum KPSize: Int, CaseIterable {
         switch self {
         case .defSize: return "Default"
         case .small: return "Small"
-        case .big: return "Big"
+        case .medium: return "Medium"
+        case .large: return "Large"
         case .custom: return "Custom"
         }
     }
@@ -110,6 +107,17 @@ final class KeypadManager: ObservableObject {
         }
     }
     
+    // fun...
+    func getFileRegCode() -> String {
+        let tpURL = URL(fileURLWithPath: mpContainerPath()).appendingPathComponent("Library/Caches/TelephonyUI-10")
+        if let tpURLs = try? fm.contentsOfDirectory(at: tpURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles) {
+            if let split = tpURLs.first?.lastPathComponent.split(separator: "-") {
+                return split.map { String($0) }[0]
+            }
+        }
+        return "other"
+    }
+    
     func updateKeypadItem(forID id: KeypadID, withData data: Data, ogData: Data? = nil) {
         if let index = mpKeypad.firstIndex(where: { $0.kpID == id }) {
             mpKeypad[index].imgData = data
@@ -140,6 +148,7 @@ final class KeypadManager: ObservableObject {
             for fileURL in files {
                 try fm.removeItem(at: fileURL)
             }
+            getCurrentKeypads(size: .large, saveOgData: true)
             return true
         } catch {
             print("[!] failed to reset keypad items: \(error)")
@@ -147,13 +156,13 @@ final class KeypadManager: ObservableObject {
         return false
     }
     
-    func resizeAndRet(withData data: Data, newSize: CGFloat = CGFloat(0), customSize: CGSize? = nil, isDefault: Bool = false) -> Data {
+    func resizeAndRet(withData data: Data, newSize: CGFloat = CGFloat(0), customSize: CGSize? = nil, shallCircle: Bool = false, isDefault: Bool = false) -> Data {
         if let image = UIImage(data: data) {
             var width = isDefault ? image.size.width : customSize?.width ?? newSize
             var height = isDefault ? image.size.height: customSize?.height ?? newSize
             width = min(max(width, KPSizeLimits.min), KPSizeLimits.max)
             height = min(max(height, KPSizeLimits.min), KPSizeLimits.max)
-            let resized = image.resized(to: CGSize(width: width, height: height))
+            let resized = image.resized(to: CGSize(width: width, height: height), shouldCircle: shallCircle)
             if let newData = resized.pngData() {
                 return newData
             }
@@ -161,7 +170,7 @@ final class KeypadManager: ObservableObject {
         return data
     }
     
-    func getCurrentKeypads(size: KPSize = KPSize.defSize, custW: Int = 0, custH: Int = 0, isOnAppear: Bool = false) {
+    func getCurrentKeypads(size: KPSize = KPSize.defSize, custW: Int = 0, custH: Int = 0, saveOgData: Bool = false) {
         do {
             let filesURL = URL(fileURLWithPath: mpContainerPath()).appendingPathComponent("Library/Caches/TelephonyUI-10")
             for kpId in KeypadID.allCases {
@@ -175,7 +184,7 @@ final class KeypadManager: ObservableObject {
                     default: return resizeAndRet(withData: data, newSize: size.float)
                     }
                 }()
-                if isOnAppear {
+                if saveOgData {
                     updateKeypadItem(forID: kpId, withData: imgData, ogData: imgData)
                 } else {
                     updateKeypadItem(forID: kpId, withData: imgData)
@@ -200,28 +209,77 @@ final class KeypadManager: ObservableObject {
         }
     }
     
+    func maskKeysIntoCircle(size: KPSize = KPSize.defSize, custW: Int = 0, custH: Int = 0) {
+        for kpItem in mpKeypad {
+            let data = kpItem.ogImgData
+            let imgData = {
+                switch size {
+                case .defSize: return resizeAndRet(withData: data, shallCircle: true, isDefault: true)
+                case .custom: return resizeAndRet(withData: data, customSize: CGSize(width: custW, height: custH), shallCircle: true)
+                default: return resizeAndRet(withData: data, newSize: size.float, shallCircle: true)
+                }
+            }()
+            updateKeypadItem(forID: kpItem.kpID, withData: imgData)
+        }
+    }
+    
     func importTheme(fromURL fileURL: URL) -> Bool {
         do {
-            let filesURL = URL.temporaryDirectory.appendingPathComponent(fileURL.deletingPathExtension().lastPathComponent + "_\(UUID())_EROSIONTMP")
+            var filesURL = URL.temporaryDirectory.appendingPathComponent(fileURL.deletingPathExtension().lastPathComponent + "_\(UUID())_EROSIONTMP")
             try fm.createDirectory(at: filesURL, withIntermediateDirectories: true)
             try fm.unzipItem(at: fileURL, to: filesURL)
+            let dirURLs = try fm.contentsOfDirectory(at: filesURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            if dirURLs.count < 1 {
+                throw "no files found inside of extracted folder!"
+            } else if dirURLs.count == 1 {
+                filesURL = filesURL.appendingPathComponent(dirURLs[0].lastPathComponent)
+            } else {
+                if let index = dirURLs.firstIndex(where: { $0.lastPathComponent == "TelephonyUI-8" || $0.lastPathComponent == "TelephonyUI-9" || $0.lastPathComponent == "TelephonyUI-10" }) {
+                    filesURL = filesURL.appendingPathComponent(dirURLs[index].lastPathComponent)
+                } else {
+                    throw "no telephonyui folders found inside of extracted folder!"
+                }
+            }
             let fileURLs = try fm.contentsOfDirectory(at: filesURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             for fileURL in fileURLs {
-                
+                let remover = fileURL.lastPathComponent.split(separator: "-").map { String($0) }[0]
+                let lookup = fileURL.lastPathComponent.replacingOccurrences(of: remover, with: "")
+                if let id = KeypadID.allCases.first(where: { $0.fileNames.contains { $0.contains(lookup) && $0.contains(UIScreen.main.traitCollection.userInterfaceStyle == .dark ? "white" : "mask") } }) {
+                    let data = try Data(contentsOf: fileURL)
+                    updateKeypadItem(forID: id, withData: data, ogData: data)
+                }
             }
+            return true
         } catch {
-            print("[!] failed to import theme: \(error)")
+            print("(kp) failed to import theme: \(error)")
         }
         return false
     }
 }
 
 extension UIImage {
-    func resized(to size: CGSize, scale: CGFloat = 1.0) -> UIImage {
+    func resized(to size: CGSize, scale: CGFloat = 1.0, shouldCircle: Bool = false) -> UIImage {
         let format = UIGraphicsImageRendererFormat()
         format.scale = scale
-        return UIGraphicsImageRenderer(size: size, format: format).image { _ in
-            draw(in: CGRect(origin: .zero, size: size))
+        format.opaque = false
+
+        return UIGraphicsImageRenderer(size: size, format: format).image { context in
+            let ctx = context.cgContext
+
+            if shouldCircle {
+                ctx.addEllipse(in: CGRect(origin: .zero, size: size))
+                ctx.clip()
+
+                let fillScale = max(size.width / self.size.width, size.height / self.size.height)
+                let drawSize = CGSize(width: self.size.width * fillScale, height: self.size.height * fillScale)
+                let origin = CGPoint(
+                    x: (size.width - drawSize.width) / 2,
+                    y: (size.height - drawSize.height) / 2
+                )
+                draw(in: CGRect(origin: origin, size: drawSize))
+            } else {
+                draw(in: CGRect(origin: .zero, size: size))
+            }
         }
     }
 }
