@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import PartyUI
 
 enum FolderType {
     case normal, bundle, container

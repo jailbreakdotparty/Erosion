@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import PartyUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
@@ -20,7 +19,7 @@ struct SettingsView: View {
                     Toggle("Show Tooltips", isOn: $showTips)
                     Toggle("Respring on Apply", isOn: $autoRespring)
                 } header: {
-                    HeaderLabel(text: "View Options", icon: "eye")
+                    HeaderLabel("View Options", symbol: "eye")
                 }
                 
                 Section {
@@ -44,7 +43,7 @@ struct SettingsView: View {
                     Button {
                         dismiss()
                     } label: {
-                        ToolbarLabel("Close", icon: "xmark")
+                        ToolbarLabel("Close", symbol: "xmark")
                     }
                 }
             }

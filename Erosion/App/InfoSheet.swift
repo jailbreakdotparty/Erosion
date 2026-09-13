@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import PartyUI
 
 struct InfoSheet<CellContent: View, ButtonContent: View>: View {
     var title: String
@@ -35,13 +34,13 @@ struct InfoSheet<CellContent: View, ButtonContent: View>: View {
 
 struct InfoSheetCell: View {
     var title: String
-    var icon: String
+    var symbol: String
     var context: String
     
     var body: some View {
         VStack {
             HStack(spacing: 8) {
-                Image(systemName: icon)
+                Image(systemName: symbol)
                     .frame(width: 24, height: 22, alignment: .center)
                     .foregroundStyle(Color.accentColor)
                 Text(title)

@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PartyUI
+
 
 struct TextViewer: View {
     @EnvironmentObject var mgr: ErosionManager
@@ -69,7 +69,7 @@ struct TextViewer: View {
                             isEditing = false
                             editText = fileText
                         } label: {
-                            ToolbarLabel("Cancel", icon: "xmark")
+                            ToolbarLabel("Cancel", symbol: "xmark")
                         }
                     }
                     
@@ -111,14 +111,14 @@ struct TextViewer: View {
                                 fileText = getFileText(fileURL)
                             }
                         } label: {
-                            ToolbarLabel("Save", icon: "checkmark")
+                            ToolbarLabel("Save", symbol: "checkmark")
                         }
                     } else {
                         Button {
                             dismiss()
                             mgr.refreshFiles.toggle()
                         } label: {
-                            ToolbarLabel("Close", icon: "xmark")
+                            ToolbarLabel("Close", symbol: "xmark")
                         }
                     }
                 }

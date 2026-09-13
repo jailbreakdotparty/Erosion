@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import PartyUI
+
 import UIKit
 
 // rave is the internal codename for ios 27
@@ -25,6 +25,14 @@ func isSupported() -> Bool {
     }
     return false
 }
+
+func doubleSysVrs() -> Double {
+    let pieces = [String(vrs.majorVersion), String(vrs.minorVersion)]
+    let combined = pieces.joined(separator: ".")
+    return Double(combined) ?? 0.0
+}
+
+
 
 // device info getters
 func machineName() -> String {

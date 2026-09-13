@@ -7,7 +7,7 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
-import PartyUI
+
 
 struct OperationsView: View {
     @State private var directory = ""
@@ -57,7 +57,7 @@ struct OperationsView: View {
                     }
                 }
             } header: {
-                HeaderLabel(text: "Target", icon: "dot.scope")
+                HeaderLabel( "Target", symbol: "dot.scope")
             }
             
             Section {
@@ -113,7 +113,7 @@ struct OperationsView: View {
                 }
                 .disabled(imprtData.isEmpty)
             } header: {
-                HeaderLabel(text: "Operations", icon: "wrench.and.screwdriver")
+                HeaderLabel( "Operations", symbol: "wrench.and.screwdriver")
             }
         }
         .navigationTitle("File Operations")

@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PartyUI
+
 import Combine
 
 enum MGURL {

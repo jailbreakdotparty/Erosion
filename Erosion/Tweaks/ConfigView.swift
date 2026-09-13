@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PartyUI
+
 
 enum CNURL {
     static var sharedDevConfig = FSURL.configProfiles.appendingPathComponent("SharedDeviceConfiguration.plist")
@@ -74,12 +74,12 @@ struct ConfigView: View {
                 }
                 
                 Section {
-                    PlainToggle(text: "Enable Supervision", infoType: .warning, infoTitle: "Supervision Warning!", infoMessage: CNMsg.supWarning, isOn: $supervised)
+                    PlainToggle( "Enable Supervision", infoType: .warning, infoTitle: "Supervision Warning!", infoMessage: CNMsg.supWarning, isOn: $supervised)
                     if supervised {
                         TextField("Organization Name", text: $orgName)
                     }
                 } header: {
-                    HeaderLabel(text: "Supervision", icon: "eye")
+                    HeaderLabel( "Supervision", symbol: "eye")
                 }
             }
             .navigationTitle("Configurations")

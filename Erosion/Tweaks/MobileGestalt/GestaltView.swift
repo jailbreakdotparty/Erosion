@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PartyUI
+
 import UniformTypeIdentifiers
 
 struct GestaltView: View {
@@ -40,17 +40,17 @@ struct GestaltView: View {
                     HStack {
                         Picker("Subtype", selection: $mgSubtype) {
                             Text("Original (\(mgOgSubtype))").tag(mgOgSubtype)
-                            if isDynamIslandHD() && doubleSystemVersion() < 19.0 {
+                            if isDynamIslandHD() && doubleSysVrs() < 19.0 {
                                 Text("Disable Dynamic Island").tag(2436)
                             }
                             Text("iPhone 14 Pro").tag(2436)
                             Text("iPhone 14 Pro Max").tag(2796)
                             Text("iPhone 15 Pro Max").tag(2976)
-                            if doubleSystemVersion() >= 18.0 {
+                            if doubleSysVrs() >= 18.0 {
                                 Text("iPhone 16 Pro").tag(2622)
                                 Text("iPhone 16 Pro Max").tag(2868)
                             }
-                            if doubleSystemVersion() >= 26.0 {
+                            if doubleSysVrs() >= 26.0 {
                                 Text("iPhone Air").tag(2736)
                             }
                             if isHomeButtonHD() {
@@ -71,46 +71,46 @@ struct GestaltView: View {
                         TextField("Device Name", text: $mgDeviceName)
                     }
                 } header: {
-                    HeaderLabel(text: "Artwork", icon: "paintbrush.pointed")
+                    HeaderLabel( "Artwork", symbol: "paintbrush.pointed")
                 }
                 
                 if !isDynamIslandHD() || !isAODHD() || !isBootChimeHD() || !isChargeLimitHD() || mgOverrideGates {
                     Section {
                         if !isDynamIslandHD() || mgOverrideGates {
-                            PlainToggle(text: "Enable Dynamic Island", minSupportedVersion: 19.0, isOn: store.mgKeyBinding([MGKey.island]))
+                            PlainToggle("Enable Dynamic Island", minVrs: 19.0, isOn: store.mgKeyBinding([MGKey.island]))
                         }
                         if !isAODHD() || mgOverrideGates {
-                            PlainToggle(text: "Enable AOD", minSupportedVersion: 18.0, isOn: store.mgKeyBinding([MGKey.AOD, MGKey.AOTime]))
+                            PlainToggle("Enable AOD", minVrs: 18.0, isOn: store.mgKeyBinding([MGKey.AOD, MGKey.AOTime]))
                             if store.isEnabled([MGKey.AOD]) {
-                                PlainToggle(text: "Enable AOD Vibrancy", minSupportedVersion: 18.0, isOn: store.mgKeyBinding([MGKey.AODVibrancy]))
+                                PlainToggle( "Enable AOD Vibrancy", minVrs: 18.0, isOn: store.mgKeyBinding([MGKey.AODVibrancy]))
                             }
                         }
                         if !isBootChimeHD() || mgOverrideGates {
-                            PlainToggle(text: "Enable Charge Limit", minSupportedVersion: 17.0, isOn: store.mgKeyBinding([MGKey.chargeLim]))
+                            PlainToggle( "Enable Charge Limit", minVrs: 17.0, isOn: store.mgKeyBinding([MGKey.chargeLim]))
                         }
                         if !isChargeLimitHD() || mgOverrideGates {
-                            PlainToggle(text: "Enable Boot Chime", isOn: store.mgKeyBinding([MGKey.bootChime]))
+                            PlainToggle( "Enable Boot Chime", isOn: store.mgKeyBinding([MGKey.bootChime]))
                         }
                     } header: {
-                        HeaderLabel(text: "Hardware Features", icon: "gearshape")
+                        HeaderLabel("Hardware Features", symbol: "gearshape")
                     }
                 }
                 
                 Section {
-                    PlainToggle(text: "Enable Internal Install", infoType: .info, infoMessage: MGMsg.intInstall, isOn: store.mgKeyBinding([MGKey.intInstall]))
-                    PlainToggle(text: "Enable Internal Build", infoType: .info, infoMessage: MGMsg.intBuild, isOn: store.mgKeyBinding([MGKey.intBuild]))
+                    PlainToggle( "Enable Internal Install", infoType: .info, infoMessage: MGMsg.intInstall, isOn: store.mgKeyBinding([MGKey.intInstall]))
+                    PlainToggle( "Enable Internal Build", infoType: .info, infoMessage: MGMsg.intBuild, isOn: store.mgKeyBinding([MGKey.intBuild]))
                 } header: {
-                    HeaderLabel(text: "Internal", icon: "ant")
+                    HeaderLabel( "Internal", symbol: "ant")
                 }
                 .disabled(store.isEnabled([MGKey.appIntell]))
                 
                 Section {
-                    PlainToggle(text: "Enable SRD UI", minSupportedVersion: 26.0, isOn: store.mgKeyBinding([MGKey.srd]))
+                    PlainToggle( "Enable SRD UI", minVrs: 26.0, isOn: store.mgKeyBinding([MGKey.srd]))
                     if showRegionTweak {
-                        PlainToggle(text: "Disable Region Restrictions", isOn: store.mgRegionRestrictionsBinding())
+                        PlainToggle( "Disable Region Restrictions", isOn: store.mgRegionRestrictionsBinding())
                     }
                     if !isAppleIntellHD() || mgOverrideGates {
-                        PlainToggle(text: "Enable Apple Intelligence", minSupportedVersion: 18.1, isOn: store.mgKeyBinding([MGKey.appIntell]))
+                        PlainToggle( "Enable Apple Intelligence", minVrs: 18.1, isOn: store.mgKeyBinding([MGKey.appIntell]))
                             .onChange(of: store.mgKeyBinding([MGKey.appIntell]).wrappedValue) { (oldVal, newVal) in
                                 if newVal {
                                     store.mgPullKeys([MGKey.intBuild, MGKey.intInstall])
@@ -121,7 +121,7 @@ struct GestaltView: View {
                         Picker("Spoofing", selection: $mgProductType) {
                             Text("Default").tag(ogMachineName)
                             if ogMachineName.contains("Pad") {
-                                if doubleSystemVersion() >= 17.4 {
+                                if doubleSysVrs() >= 17.4 {
                                     Text("iPad Pro 11-inch (M4)").tag("iPad16,3")
                                     Text("iPad Pro 11-inch (M4, Cellular)").tag("iPad16,4")
                                 }
@@ -130,13 +130,13 @@ struct GestaltView: View {
                             } else {
                                 Text("iPhone 15 Pro").tag("iPhone16,1")
                                 Text("iPhone 15 Pro Max").tag("iPhone16,2")
-                                if doubleSystemVersion() >= 18.0 {
+                                if doubleSysVrs() >= 18.0 {
                                     Text("iPhone 16").tag("iPhone17,3")
                                     Text("iPhone 16 Plus").tag("iPhone17,4")
                                     Text("iPhone 16 Pro").tag("iPhone17,1")
                                     Text("iPhone 16 Pro Max").tag("iPhone17,2")
                                 }
-                                if doubleSystemVersion() >= 19.0 {
+                                if doubleSysVrs() >= 19.0 {
                                     Text("iPhone 17").tag("iPhone18,3")
                                     Text("iPhone 17 Pro").tag("iPhone18,1")
                                     Text("iPhone 17 Pro Max").tag("iPhone18,2")
@@ -153,41 +153,41 @@ struct GestaltView: View {
                         .buttonStyle(.plain)
                     }
                 } header: {
-                    HeaderLabel(text: "Eligibility", icon: "flag")
+                    HeaderLabel("Eligibility", symbol: "flag")
                 }
                 
                 Section {
                     if !isCrashDectHD() || mgOverrideGates {
-                        PlainToggle(text: "Crash Detection", isOn: store.mgKeyBinding([MGKey.crashDet]))
+                        PlainToggle( "Crash Detection", isOn: store.mgKeyBinding([MGKey.crashDet]))
                     }
                     if !isPWMHD() || mgOverrideGates {
-                        PlainToggle(text: "Pulse Width Modulation", minSupportedVersion: 19.0, isOn: store.mgKeyBinding([MGKey.pwm]))
+                        PlainToggle( "Pulse Width Modulation", minVrs: 19.0, isOn: store.mgKeyBinding([MGKey.pwm]))
                     }
                     if ogMachineName.contains("iPhone") || mgOverrideGates {
-                        PlainToggle(text: "Apple Pencil", isOn: store.mgKeyBinding([MGKey.appPencil]))
+                        PlainToggle( "Apple Pencil", isOn: store.mgKeyBinding([MGKey.appPencil]))
                     }
                     if !isCamControlHD() || mgOverrideGates {
-                        PlainToggle(text: "Camera Control", minSupportedVersion: 18.0, isOn: store.mgKeyBinding([MGKey.camButton, MGKey.grapPefr]))
+                        PlainToggle( "Camera Control", minVrs: 18.0, isOn: store.mgKeyBinding([MGKey.camButton, MGKey.grapPefr]))
                     }
                     if !isActionButtonHD() || mgOverrideGates {
-                        PlainToggle(text: "Action Button", minSupportedVersion: 17.0, isOn: store.mgKeyBinding([MGKey.actButton]))
+                        PlainToggle( "Action Button", minVrs: 17.0, isOn: store.mgKeyBinding([MGKey.actButton]))
                     }
                     if isHomeButtonHD() || mgOverrideGates {
-                        PlainToggle(text: "Tap to Wake", isOn: store.mgKeyBinding([MGKey.tapToWake]))
+                        PlainToggle( "Tap to Wake", isOn: store.mgKeyBinding([MGKey.tapToWake]))
                     }
                 } header: {
-                    HeaderLabel(text: "Preference Bundles", icon: "gear")
+                    HeaderLabel("Preference Bundles", symbol: "gear")
                 }
                 
                 Section {
                     if machineName().contains("iPad") || mgOverrideGates {
-                        PlainToggle(text: "Enable Stage Manager", isOn: store.mgKeyBinding([MGKey.stageMgr]))
+                        PlainToggle( "Enable Stage Manager", isOn: store.mgKeyBinding([MGKey.stageMgr]))
                     }
                     if store.strVal(forKey: MGKey.deviceClass) == "iPhone" || mgOverrideGates {
-                        PlainToggle(text: "Enable iPadOS UI", infoType: .warning, infoMessage: MGMsg.ipadOS, isOn: store.mgTrollPadBinding())
+                        PlainToggle( "Enable iPadOS UI", infoType: .warning, infoMessage: MGMsg.ipadOS, isOn: store.mgTrollPadBinding())
                     }
                 } header: {
-                    HeaderLabel(text: "iPadOS", icon: "ipad")
+                    HeaderLabel( "iPadOS", symbol: "ipad")
                 }
             }
             .navigationTitle("MobileGestalt")
@@ -242,11 +242,11 @@ struct GestaltView: View {
                                         })
                                     }
                                 } header: {
-                                    HeaderLabel(text: "Data", icon: "loupe")
+                                    HeaderLabel( "Data", symbol: "loupe")
                                 }
                                 
                                 Section {
-                                    PlainToggle(text: "Show Hidden Tweaks", infoType: .warning, infoMessage: MGMsg.hidTweakWarn, isOn: $mgOverrideGates)
+                                    PlainToggle( "Show Hidden Tweaks", infoType: .warning, infoMessage: MGMsg.hidTweakWarn, isOn: $mgOverrideGates)
                                     Toggle("Show Custom Keys", isOn: $showCustomKeys)
                                     Toggle("Overwrite Atomically", isOn: $mgWriteAtomically)
                                 } footer: {
@@ -276,11 +276,11 @@ struct GestaltView: View {
                 NavigationStack {
                     VStack {
                         InfoSheet(title: "Before you begin...") {
-                            InfoSheetCell(title: "Important Warning!", icon: "exclamationmark.triangle.fill", context: MGMsg.support)
+                            InfoSheetCell(title: "Important Warning!", symbol: "exclamationmark.triangle.fill", context: MGMsg.support)
                                 .modifier(SectionPlatter())
-                            InfoSheetCell(title: "Apple Intelligence (Classic)", icon: "apple.intelligence", context: MGMsg.spoofAI)
-                            InfoSheetCell(title: "iPadOS UI", icon: "ipad", context: MGMsg.ipadOS)
-                            InfoSheetCell(title: "Region Restrictions", icon: "map", context: MGMsg.region)
+                            InfoSheetCell(title: "Apple Intelligence (Classic)", symbol: "apple.intelligence", context: MGMsg.spoofAI)
+                            InfoSheetCell(title: "iPadOS UI", symbol: "ipad", context: MGMsg.ipadOS)
+                            InfoSheetCell(title: "Region Restrictions", symbol: "map", context: MGMsg.region)
                         } button: {
                             Button("Apply") {
                                 showInfoSheet = false

@@ -6,27 +6,52 @@
 //
 
 import SwiftUI
-import PartyUI
+
 
 struct ContentView: View {
-    @State private var currentTab = 0
+    @AppStorage("ogMachineName") var ogMachineName = ""
+    @EnvironmentObject var mgr: ErosionManager
+    @State private var showSettings = false
     
     var body: some View {
-        TabView {
-            HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house")
+        NavigationStack {
+            List {
+                Section {
+                    LogView()
+                        .modifier(TerminalPlatter())
+                } header: {
+                    HeaderLabel( "Version \(AppInfo.appVersion) (\(build))", symbol: "info.circle")
+                } footer: {
+                    Text("Made with love by the [jailbreak.party](https://jailbreak.party/) team. Thanks to forcequitOS for the [bad_query](https://github.com/forcequitOS/bad_query) sandbox escape that this app relies on.")
                 }
-                .id(0)
-            TweaksView()
-                .tabItem {
-                    Label("Tweaks", systemImage: "wrench.and.screwdriver")
+                
+                Section {
+                    Button("Respring") {
+                        mgr.shouldRespring = true
+                    }
+                } header: {
+                    HeaderLabel( "Actions", symbol: "gearshape")
                 }
-                .id(1)
-            FMRootView()
-                .tabItem {
-                    Label("File Browser", systemImage: "folder")
+            }
+            .navigationTitle("Erosion")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Label("Settings", systemImage: "gear")
+                            .labelStyle(.iconOnly)
+                    }
                 }
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+            }
+            .onAppear {
+                if ogMachineName.isEmpty {
+                    ogMachineName = machineName()
+                }
+            }
         }
     }
 }

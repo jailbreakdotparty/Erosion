@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PartyUI
+
 
 struct TweaksView: View {
     var body: some View {
@@ -16,7 +16,7 @@ struct TweaksView: View {
                     NavigationLink("Custom Wallpapers", destination: PosterBoardView())
                     NavigationLink("Dialer Themer", destination: KeypadView())
                 } header: {
-                    HeaderLabel(text: "Theming", icon: "paintbrush")
+                    HeaderLabel( "Theming", symbol: "paintbrush")
                 }
                 
                 Section {
@@ -26,7 +26,7 @@ struct TweaksView: View {
                     }
                     NavigationLink("File Operations", destination: OperationsView())
                 } header: {
-                    HeaderLabel(text: "System", icon: "gear")
+                    HeaderLabel( "System", symbol: "gear")
                 }
             }
             .navigationTitle("Tweaks")

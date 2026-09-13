@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PartyUI
+
 import UniformTypeIdentifiers
 
 struct InfoViewer: View {
@@ -37,7 +37,7 @@ struct InfoViewer: View {
                     StringInfoCell(file.modifiedDateStr, label: "Last Modified")
                     BoolInfoCell(file.type == .symlink, label: "Symlink")
                 } header: {
-                    HeaderLabel(text: "File", icon: "doc")
+                    HeaderLabel( "File", symbol: "doc")
                 }
                 
                 Section {
@@ -48,7 +48,7 @@ struct InfoViewer: View {
                     BoolInfoCell(file.writable, label: "Writable")
                     BoolInfoCell(file.executable, label: "Executable")
                 } header: {
-                    HeaderLabel(text: "Permissions", icon: "shield")
+                    HeaderLabel( "Permissions", symbol: "shield")
                 }
             }
             .navigationTitle("\(file.type.rawValue.capitalized) Info")
@@ -59,7 +59,7 @@ struct InfoViewer: View {
                     Button {
                         dismiss()
                     } label: {
-                        ToolbarLabel("Close", icon: "xmark")
+                        ToolbarLabel("Close", symbol: "xmark")
                     }
                 }
             }

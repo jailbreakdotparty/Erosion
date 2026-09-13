@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PartyUI
+
 
 struct MGCustomKey: Identifiable, Codable, Equatable {
     var id: String { key }
@@ -37,7 +37,7 @@ struct CustomKeyView: View {
                     }
                 }
             } header: {
-                HeaderLabel(text: "Add Keys", icon: "plus")
+                HeaderLabel( "Add Keys", symbol: "plus")
             }
             
             Section {

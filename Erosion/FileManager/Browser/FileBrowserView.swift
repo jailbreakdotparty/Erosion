@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PartyUI
+
 import QuickLook
 
 enum FileSortMode: String, CaseIterable, Codable, Hashable {
@@ -58,7 +58,7 @@ struct FileBrowserView: View {
                     }
                 }
             } else if showFailure {
-                CompactAlert(title: "Failed to load files from directory!", icon: "folder.badge.questionmark", text: failMsg)
+                CompactAlert(title: "Failed to load files from directory!", symbol: "folder.badge.questionmark", text: failMsg)
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
             } else {
@@ -208,7 +208,7 @@ struct FileBrowserView: View {
                                 }
                                 Toggle("Hide Dates", isOn: $hideDates)
                             } header: {
-                                HeaderLabel(text: "View Options", icon: "eye")
+                                HeaderLabel("View Options", symbol: "eye")
                             }
                             
                             Section {
@@ -221,7 +221,7 @@ struct FileBrowserView: View {
                                 }
                                 Toggle("Monospaced Font", isOn: $useMonospaced)
                             } header: {
-                                HeaderLabel(text: "Text Viewer", icon: "doc.plaintext")
+                                HeaderLabel("Text Viewer", symbol: "doc.plaintext")
                             }
                         }
                         .navigationTitle("FM Settings")

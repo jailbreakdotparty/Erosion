@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PartyUI
+
 import QuickLook
 import ZIPFoundation
 

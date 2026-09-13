@@ -8,16 +8,6 @@
 import SwiftUI
 import Combine
 
-/*
- i took on a bit of an ambitious goal: making a plist editor that works properly and has a bunch of features.
- 
- to actually get the data, i decided to cast the raw data from a plist as [String : Any], which is the usual swift format of plists. then, i converted [String : Any] into an array that contains my own custom item. it stores the key and the raw value, gets the type (getType()), converts the value into a boolean, string, and dictionary for editing, and then can be converted back into [String : Any] when calling getRawValue() on the plist item.
- 
- for editing plists, i used a manager that stores the converted [PlistItem] array, and is binding throughout the views for viewing. however, for actually editing, i decided to manually edit instead of using bindings, as i had attempted to use a binding-based system to avoid wrappers, but it was incredibly unstable.
- 
- it's not the best editor in the world, and could definetely use some improvements and modifications, but it works pretty well for the time being and seems to be able to write to system plists without messing them up.
- */
-
 final class PlistManager: ObservableObject {
     static let shared = PlistManager()
     

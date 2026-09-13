@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import PartyUI
 
 struct LogView: View {
     @StateObject private var mgr = ErosionManager.shared

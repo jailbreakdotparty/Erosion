@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		1541E9D33036B49300C8AF93 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 1541E9D23036B49300C8AF93 /* ZIPFoundation */; };
 		1541E9D63036B56800C8AF93 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1541E9D53036B56800C8AF93 /* MobileCoreServices.framework */; };
-		157FB19F30301A850050327F /* PartyUI in Frameworks */ = {isa = PBXBuildFile; productRef = 157FB19E30301A850050327F /* PartyUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,7 +43,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				1541E9D63036B56800C8AF93 /* MobileCoreServices.framework in Frameworks */,
-				157FB19F30301A850050327F /* PartyUI in Frameworks */,
 				1541E9D33036B49300C8AF93 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -97,7 +95,6 @@
 			);
 			name = Erosion;
 			packageProductDependencies = (
-				157FB19E30301A850050327F /* PartyUI */,
 				1541E9D23036B49300C8AF93 /* ZIPFoundation */,
 			);
 			productName = Erosion;
@@ -130,7 +127,6 @@
 			mainGroup = 151457F6302FE21A00DDFE07;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				157FB19D30301A850050327F /* XCRemoteSwiftPackageReference "PartyUI" */,
 				1541E9D13036B49300C8AF93 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -289,7 +285,7 @@
 				CODE_SIGN_ENTITLEMENTS = Erosion/Erosion.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = HTH7RGGR9D;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -340,7 +336,7 @@
 				CODE_SIGN_ENTITLEMENTS = Erosion/Erosion.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = HTH7RGGR9D;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -413,14 +409,6 @@
 				minimumVersion = 0.9.20;
 			};
 		};
-		157FB19D30301A850050327F /* XCRemoteSwiftPackageReference "PartyUI" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/jailbreakdotparty/PartyUI.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.2.1;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -428,11 +416,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1541E9D13036B49300C8AF93 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
 			productName = ZIPFoundation;
-		};
-		157FB19E30301A850050327F /* PartyUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 157FB19D30301A850050327F /* XCRemoteSwiftPackageReference "PartyUI" */;
-			productName = PartyUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

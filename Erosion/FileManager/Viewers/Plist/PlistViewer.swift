@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import PartyUI
 
 struct PlistViewer: View {
     @StateObject private var pmgr = PlistManager.shared
@@ -24,7 +23,7 @@ struct PlistViewer: View {
         NavigationView {
             List {
                 if showErrorView {
-                    PlainAlert(title: "Failed to load plist!", icon: "exclamationmark.triangle.fill", text: Errors.checkLogs, color: .yellow)
+                    PlainAlert(title: "Failed to load plist!", symbol: "exclamationmark.triangle.fill", text: Errors.checkLogs, color: .yellow)
                 } else {
                     ForEach($pmgr.plistArray) { $item in
                         ItemRow(item: $item, hierarchy: 0)
@@ -67,7 +66,7 @@ struct PlistViewer: View {
                     Button {
                         dismiss()
                     } label: {
-                        ToolbarLabel("Close", icon: "xmark")
+                        ToolbarLabel("Close", symbol: "xmark")
                     }
                 }
             }

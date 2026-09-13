@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PartyUI
+
 import UniformTypeIdentifiers
 
 let pbHandler = PBHandler()
@@ -36,7 +36,7 @@ struct PosterBoardView: View {
                     showImporter = true
                 } label: {
                     VStack(alignment: .leading) {
-                        CompactAlert(title: "No tendies imported!", icon: "exclamationmark.triangle.fill", text: PBMsg.noTendies)
+                        CompactAlert(title: "No tendies imported!", symbol: "exclamationmark.triangle.fill", text: PBMsg.noTendies)
                             .padding(.horizontal, 15)
                     }
                     .frame(alignment: .leading)
@@ -129,7 +129,7 @@ struct PosterBoardView: View {
                 Button {
                     showImporter = true
                 } label: {
-                    ButtonLabel(text: "Import .tendies", icon: "arrow.down.doc")
+                    ButtonLabel("Import .tendies", symbol: "arrow.down.doc")
                 }
             }
             .buttonStyle(ActionButtonStyle())
@@ -158,7 +158,7 @@ struct PosterBoardView: View {
                             Section {
                                 TextField("PosterBoard Path", text: $pbContainerPath, axis: .vertical)
                             } header: {
-                                HeaderLabel(text: "PosterBoard", icon: "photo")
+                                HeaderLabel( "PosterBoard", symbol: "photo")
                             }
                             
                             Section {
@@ -188,7 +188,7 @@ struct PosterBoardView: View {
                                     }
                                 }
                             } header: {
-                                HeaderLabel(text: "Data", icon: "loupe")
+                                HeaderLabel( "Data", symbol: "loupe")
                             } footer: {
                                 Text("If you're having trouble applying custom wallpapers, try resetting any of the three extensions listed.")
                             }

@@ -9,7 +9,7 @@ import Foundation
 import Darwin
 import MachO
 import UIKit
-import PartyUI
+
 
 func mgWrite(_ data: Data) -> Bool {
     var res: (Bool, String)
