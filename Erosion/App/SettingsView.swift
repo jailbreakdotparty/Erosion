@@ -11,30 +11,31 @@ import PartyUI
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     @AppStorage("showTips") var showTips = true
+    @AppStorage("autoRespring") var autoRespring = false
     
     var body: some View {
         NavigationStack {
             List {
                 Section {
                     Toggle("Show Tooltips", isOn: $showTips)
+                    Toggle("Respring on Apply", isOn: $autoRespring)
                 } header: {
                     HeaderLabel(text: "View Options", icon: "eye")
-                } footer: {
-                    Text("With tooltips turned off, you will not get prompts that tell you how to use certain parts of the app.")
                 }
                 
                 Section {
-                    AppInfoCell(build: build)
-                    NavigationLink("Credits") {
+                    NavigationLink {
                         List {
-                            LinkCreditCell(image: Image("lunginspector"), name: "lunginspector", description: "Primary developer.", url: "https://github.com/lunginspector")
-                            LinkCreditCell(image: Image("forcequit"), name: "forcequit", description: "The bad_query sandbox escape this app relies on.", url: "https://github.com/forcequitOS/bad_query")
-                            LinkCreditCell(image: Image("rooootdev"), name: "rooootdev", description: "Various backend things from mond.", url: "https://github.com/rooootdev/mond")
+                            LinkCreditCell(image: Image("lunginspector"), name: "lunginspector", description: "Primary developer", url: "https://github.com/lunginspector")
+                            LinkCreditCell(image: Image("forcequit"), name: "forcequit", description: "bad_query sandbox escape", url: "https://github.com/forcequitOS")
+                            LinkCreditCell(image: Image("rooootdev"), name: "rooootdev", description: "Various backend components", url: "https://github.com/rooootdev")
                         }
                         .navigationTitle("Credits")
+                    } label: {
+                        AppInfoCell(build: build)
                     }
                 } footer: {
-                    Text("Made with love by the [jailbreak.party](https://jailbreak.party) team.\nJoin the [jailbreak.party](https://jailbreak.party/discord) Discord!")
+                    Text("Made with love by the [jailbreak.party](https://jailbreak.party) team.\nNeed support or want to know about new releases? Join our [jailbreak.party](Discord!)")
                 }
             }
             .navigationTitle("Settings")

@@ -12,7 +12,7 @@ import UIKit
 // rave is the internal codename for ios 27
 func raveSupported() -> Bool {
     let buildNum = buildNumber()
-    if buildNum == "24A5355q" || buildNum == "24A5370h" || buildNum == "24A5380h" || buildNum == "24A5390f" {
+    if buildNum == "24A5355q" || buildNum == "24A5370h" || buildNum == "24A5380h" || buildNum == "24A5390f" || buildNum == "24A5380l" {
         return true
     }
     return false

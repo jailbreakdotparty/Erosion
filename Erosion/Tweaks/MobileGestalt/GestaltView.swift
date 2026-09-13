@@ -14,7 +14,7 @@ struct GestaltView: View {
     @StateObject private var store = GestaltStore.shared
     @AppStorage("mgOverrideGates") private var mgOverrideGates = false
     @AppStorage("mgWriteAtomically") private var mgWriteAtomically = true
-    @AppStorage("mgAutoRespring") private var mgAutoRespring = false
+    @AppStorage("autoRespring") var autoRespring = false
     @AppStorage("hasShownSheet") private var hasShownSheet = false
     @AppStorage("showTips") var showTips = true
     @Environment(\.dismiss) private var dismiss
@@ -248,10 +248,9 @@ struct GestaltView: View {
                                 Section {
                                     PlainToggle(text: "Show Hidden Tweaks", infoType: .warning, infoMessage: MGMsg.hidTweakWarn, isOn: $mgOverrideGates)
                                     Toggle("Show Custom Keys", isOn: $showCustomKeys)
-                                    Toggle("Respring after Apply", isOn: $mgAutoRespring)
                                     Toggle("Overwrite Atomically", isOn: $mgWriteAtomically)
                                 } footer: {
-                                    Text("If you choose to overwrite MobileGestalt atomically, it will not revert after a reboot.")
+                                    Text("When atomic writes are enabled, MobileGestalt will not revert after a reboot.")
                                 }
                             }
                             .navigationTitle("Gestalt Settings")
@@ -394,7 +393,7 @@ struct GestaltView: View {
             if res {
                 print("[*] successfully overwrote mobilegestalt!")
                 Haptic.shared.play(.soft)
-                if mgAutoRespring || isFromSheet {
+                if autoRespring || isFromSheet {
                     mgr.shouldRespring = true
                 } else {
                     if showTips {

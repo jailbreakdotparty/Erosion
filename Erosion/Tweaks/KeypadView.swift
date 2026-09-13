@@ -64,7 +64,9 @@ struct KeypadView: View {
                     let res = kpMgr.applyKeypadItems()
                     if res {
                         if showTips {
-                            Alertinator.shared.alert(title: "Successfully applied custom keypads!", body: KPMsg.applyComp)
+                            Alertinator.shared.alert(title: "Successfully applied custom keypads!", body: KPMsg.applyComp, actionLabel: "Open Phone", action: {
+                                openApp(withBID: SysBID.phone)
+                            })
                         } else {
                             Haptic.shared.play(.soft)
                         }
@@ -95,6 +97,11 @@ struct KeypadView: View {
                         kpMgr.getCurrentKeypads()
                     } label: {
                         Label("Get Current Keys", systemImage: "externaldrive")
+                    }
+                    Button {
+                        openApp(withBID: SysBID.phone)
+                    } label: {
+                        Label("Open Phone", systemImage: "arrow.up.right.square")
                     }
                     Divider()
                     Button {

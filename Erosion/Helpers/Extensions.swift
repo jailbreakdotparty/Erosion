@@ -50,9 +50,15 @@ extension ButtonRole {
     }
 }
 
+// yuck
 func isSolariumUI() -> Bool {
     if #available(iOS 19.0, *) {
         return true
     }
     return false
+}
+
+// LSApplicationSuprise!!! Yayyyyy!!!!!
+func openApp(withBID bid: String) {
+    LSApplicationWorkspace().openApplication(withBundleID: bid)
 }

@@ -27,32 +27,20 @@ struct PosterBoardView: View {
     @AppStorage("hasShownFirstRunMsg") private var hasShownFirstRunMsg = false
     
     @State private var showImporter = false
-    @State private var isReady = false
     let columns = Array(repeating: GridItem(.flexible()), count: device.userInterfaceIdiom == .pad ? 4 : 2)
     
     var body: some View {
         ScrollView {
             if tendiesArray.isEmpty {
-                if !isReady {
-                    HStack(spacing: 10) {
-                        ProgressView()
-                            .offset(y: 0.5)
-                        Text("Preparing...")
+                Button {
+                    showImporter = true
+                } label: {
+                    VStack(alignment: .leading) {
+                        CompactAlert(title: "No tendies imported!", icon: "exclamationmark.triangle.fill", text: PBMsg.noTendies)
+                            .padding(.horizontal, 15)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .modifier(SectionPlatter())
-                    .padding(.horizontal, 15)
-                } else {
-                    Button {
-                        showImporter = true
-                    } label: {
-                        VStack(alignment: .leading) {
-                            CompactAlert(title: "No tendies imported!", icon: "exclamationmark.triangle.fill", text: PBMsg.noTendies)
-                                .padding(.horizontal, 15)
-                        }
-                        .frame(alignment: .leading)
-                        .multilineTextAlignment(.leading)
-                    }
+                    .frame(alignment: .leading)
+                    .multilineTextAlignment(.leading)
                 }
             }
             LazyVGrid(columns: columns) {
@@ -137,18 +125,16 @@ struct PosterBoardView: View {
             doSetupStuff()
         }
         .safeAreaInset(edge: .bottom) {
-            if isReady {
-                VStack {
-                    Button {
-                        showImporter = true
-                    } label: {
-                        ButtonLabel(text: "Import .tendies", icon: "arrow.down.doc")
-                    }
+            VStack {
+                Button {
+                    showImporter = true
+                } label: {
+                    ButtonLabel(text: "Import .tendies", icon: "arrow.down.doc")
                 }
-                .buttonStyle(ActionButtonStyle())
-                .frame(maxWidth: .infinity)
-                .padding(device.userInterfaceIdiom == .pad ? 0 : 15)
             }
+            .buttonStyle(ActionButtonStyle())
+            .frame(maxWidth: .infinity)
+            .padding(device.userInterfaceIdiom == .pad ? 0 : 15)
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -158,10 +144,9 @@ struct PosterBoardView: View {
                     } label: {
                         Label("Import .tendies", systemImage: "arrow.down.doc")
                     }
-                    .disabled(!isReady)
                     
                     Button {
-                        LSApplicationWorkspace().openApplication(withBundleID: "com.apple.PosterBoard")
+                        openApp(withBID: SysBID.poster)
                     } label: {
                         Label("Open PosterBoard", systemImage: "arrow.up.right.square")
                     }
@@ -172,9 +157,6 @@ struct PosterBoardView: View {
                         List {
                             Section {
                                 TextField("PosterBoard Path", text: $pbContainerPath, axis: .vertical)
-                                Button("Open PosterBoard") {
-                                    LSApplicationWorkspace().openApplication(withBundleID: "com.apple.PosterBoard")
-                                }
                             } header: {
                                 HeaderLabel(text: "PosterBoard", icon: "photo")
                             }
@@ -215,7 +197,6 @@ struct PosterBoardView: View {
                     } label: {
                         Label("Settings", systemImage: "gearshape")
                     }
-                    .disabled(!isReady)
                 } label: {
                     Image(systemName: "ellipsis")
                 }
@@ -243,9 +224,9 @@ struct PosterBoardView: View {
                         } else {
                             Haptic.shared.play(.soft)
                             if showTips {
-                                Alertinator.shared.alert(title: "Restart PosterBoard to finish applying!", body: PBMsg.finishApply, showCancel: false, actionLabel: "Continue", action: { LSApplicationWorkspace().openApplication(withBundleID: "com.apple.PosterBoard") })
+                                Alertinator.shared.alert(title: "Restart PosterBoard to finish applying!", body: PBMsg.finishApply, showCancel: false, actionLabel: "Continue", action: { openApp(withBID: SysBID.poster) })
                             } else {
-                                LSApplicationWorkspace().openApplication(withBundleID: "com.apple.PosterBoard")
+                                openApp(withBID: SysBID.poster)
                             }
                         }
                     }
@@ -260,21 +241,16 @@ struct PosterBoardView: View {
     }
     
     private func doSetupStuff() {
-        DispatchQueue.global(qos: .userInitiated).async {
-            if pbContainerPath.isEmpty {
-                pbContainerPath = fsHandlers.getContainerPath(forMatch: "com.apple.PosterBoard")
+        if pbContainerPath.isEmpty {
+            pbContainerPath = fsHandlers.getContainerPath(forMatch: "com.apple.PosterBoard")
+        }
+        if !fm.fileExists(atPath: AppURL.pb.path) {
+            do {
+                try fm.createDirIfNeeded(at: AppURL.pb)
+                try fm.createDirIfNeeded(at: AppURL.pbFolders)
+            } catch {
+                Alertinator.shared.alert(title: "Failed to setup PosterBoard tweaks!", body: AppMsg.opFailed)
             }
-            if !fm.fileExists(atPath: AppURL.pb.path) {
-                do {
-                    try fm.createDirIfNeeded(at: AppURL.pb)
-                    try fm.createDirIfNeeded(at: AppURL.pbFolders)
-                } catch {
-                    Task {
-                        await Alertinator.shared.alert(title: "Failed to setup PosterBoard tweaks!", body: AppMsg.opFailed)
-                    }
-                }
-            }
-            isReady = true
         }
     }
     

@@ -238,8 +238,11 @@ final class KeypadManager: ObservableObject {
         }
     }
     
+    // by far the most annoying piece of swift i've ever had to write. but, it works how it should, so i'm happy.
+    // -lunginspector, 9/11/26
     func importTheme(fromURL fileURL: URL) -> Bool {
         do {
+            // create a temp dir for extraction
             var filesURL = URL.temporaryDirectory.appendingPathComponent(fileURL.deletingPathExtension().lastPathComponent + "_\(UUID())_EROSIONTMP")
             try fm.createDirectory(at: filesURL, withIntermediateDirectories: true)
             try fm.unzipItem(at: fileURL, to: filesURL)
@@ -255,15 +258,47 @@ final class KeypadManager: ObservableObject {
                     throw "no telephonyui folders found inside of extracted folder!"
                 }
             }
+            // once extracted check each file for a match with the right image
+            var replaceCount = 0
             let fileURLs = try fm.contentsOfDirectory(at: filesURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             for fileURL in fileURLs {
-                let remover = fileURL.lastPathComponent.split(separator: "-").map { String($0) }[0]
-                let lookup = fileURL.lastPathComponent.replacingOccurrences(of: remover, with: "")
-                if let id = KeypadID.allCases.first(where: { $0.fileNames.contains { $0.contains(lookup) && $0.contains(UIScreen.main.traitCollection.userInterfaceStyle == .dark ? "white" : "mask") } }) {
-                    let data = try Data(contentsOf: fileURL)
-                    updateKeypadItem(forID: id, withData: data, ogData: data)
+                let split = fileURL.lastPathComponent.split(separator: "-").map { String($0) }
+                //print(split)
+                let fileForAppr = UIScreen.main.traitCollection.userInterfaceStyle == .dark ? "white" : "mask"
+                // for appearance - get appearance for key ("white"-dark, "mask"-light) and see if it matches the current appearance too
+                let apprName = {
+                    if split.indices.contains(3) {
+                        let appearance = split[3].split(separator: ".")[0]
+                        if appearance == fileForAppr {
+                            return split[3]
+                        }
+                    }
+                    if split.indices.contains(2) {
+                        let appearance = split[2].split(separator: ".")[0]
+                        if appearance == fileForAppr {
+                            return split[2]
+                        }
+                    }
+                    return ""
+                }()
+                //print(apprName)
+                if split.indices.contains(1) {
+                    // lookup for key
+                    let keyNum = split[1]
+                    //print("(kp) fileName: \(fileURL.lastPathComponent), keyNum: \(keyNum), appearance: \(appearance), fileForAppr: \(fileForAppr), apprName: \(apprName)")
+                    // check if that's the appearance we actually want
+                    if let id = KeypadID.allCases.first(where: { $0.fileNames.contains { $0.contains(keyNum) && $0.contains(apprName) }}) {
+                        //print("(kp) found image! lookup: \(keyNum), fileName: \(fileURL.lastPathComponent)")
+                        let data = try Data(contentsOf: fileURL)
+                        updateKeypadItem(forID: id, withData: data, ogData: data)
+                        replaceCount += 1
+                    }
                 }
             }
+            if replaceCount < 1 {
+                throw "the file was unzipped, but no keys were found?"
+            }
+            print("(kp) successfully imported theme! fileName: \(fileURL.lastPathComponent), imported keys: \(replaceCount)")
             return true
         } catch {
             print("(kp) failed to import theme: \(error)")

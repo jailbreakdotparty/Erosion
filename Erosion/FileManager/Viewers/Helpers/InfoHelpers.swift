@@ -63,3 +63,8 @@ func readMetaKey(at url: URL, key: String) -> String? {
 
     return plist[key] as? String
 }
+
+enum SysBID {
+    static var phone = "com.apple.mobilephone"
+    static var poster = "com.apple.PosterBoard"
+}
