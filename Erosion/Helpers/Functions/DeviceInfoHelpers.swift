@@ -20,10 +20,15 @@ func raveSupported() -> Bool {
 
 let vrs = ProcessInfo.processInfo.operatingSystemVersion
 func isSupported() -> Bool {
-    if (vrs.majorVersion == 26 && vrs.minorVersion < 7) || raveSupported() {
-        return true
-    }
-    return false
+    // Skadz 2026-11-08:
+    //   we're updating to worse_query which is at the moment a 0day
+    //   add back in and update whenever it gets patched ig
+    return true
+    
+//    if (vrs.majorVersion == 26 && vrs.minorVersion < 7) || raveSupported() {
+//        return true
+//    }
+//    return false
 }
 
 func doubleSysVrs() -> Double {

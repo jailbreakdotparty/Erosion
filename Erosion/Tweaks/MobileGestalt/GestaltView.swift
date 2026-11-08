@@ -312,7 +312,7 @@ struct GestaltView: View {
                 store.mgCurrentDict = mgLoadData()
                 let isWritable = fm.isWritableFile(atPath: MGURL.fsGestaltURL.path)
                 if !isWritable {
-                    let res = wq.grantAccess(path: MGURL.fsGestaltURL.path)
+                    let res = wq.grantAccess(path: MGURL.fsGestaltURL.deletingLastPathComponent().path)
                     if !res.0 {
                         Alertinator.shared.alert(title: "Failed to get write access to MobileGestalt!", body: "Tweaks will NOT apply. Maybe try restarting the app?")
                     }
