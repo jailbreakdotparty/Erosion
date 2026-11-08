@@ -9,16 +9,15 @@ import Foundation
 
 import UIKit
 
+let vrs = ProcessInfo.processInfo.operatingSystemVersion
 // rave is the internal codename for ios 27
 func raveSupported() -> Bool {
-    let buildNum = buildNumber()
-    if buildNum == "24A5355q" || buildNum == "24A5370h" || buildNum == "24A5380h" || buildNum == "24A5390f" || buildNum == "24A5380l" {
-        return true
-    }
-    return false
+    // Skadz 2026-11-08:
+    //   we're updating to worse_query which is at the moment a 0day
+    //   add back in and update whenever it gets patched ig
+    return vrs.majorVersion >= 27
 }
 
-let vrs = ProcessInfo.processInfo.operatingSystemVersion
 func isSupported() -> Bool {
     // Skadz 2026-11-08:
     //   we're updating to worse_query which is at the moment a 0day

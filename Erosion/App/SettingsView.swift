@@ -32,7 +32,7 @@ struct SettingsView: View {
                 
                 Section {
                     LinkCreditCell(image: Image("lunginspector"), name: "lunginspector", description: "Primary developer and maintainer.", url: "https://github.com/lunginspector")
-                    LinkCreditCell(image: Image("forcequit"), name: "forcequit", description: "worse_query sandbox escape and container enumeration strategy.", url: "https://github.com/forcequitOS")
+                    LinkCreditCell(image: Image("forcequit"), name: "forcequit", description: "worse_query sandbox escape.", url: "https://github.com/forcequitOS")
                     LinkCreditCell(image: Image("0xjohnny"), name: "0xjohnny", description: "worse_query sandbox escape.", url: "https://github.com/0xjohnnydev")
                     LinkCreditCell(image: Image("skadz108"), name: "Skadz", description: "Exploit implementation, backend functions, and project maintainer.", url: "https://github.com/skadz108")
                     LinkCreditCell(image: Image("rooootdev"), name: "rooootdev", description: "Various backend components.", url: "https://github.com/rooootdev")

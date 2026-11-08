@@ -80,6 +80,8 @@ struct ErosionApp: App {
                 if !isSupported() && !weOnADebugBuild {
                     Alertinator.shared.alert(title: "Your \(device.systemName) version is not supported!", body: AppMsg.unsupported, showCancel: false, actionLabel: "Exit", action: { exitinator() })
                 }
+                group = wq.getAppGroup()
+                print("(wq) Using app group: \(group)")
             }
             .overlay {
                 if mgr.shouldRespring {

@@ -25,7 +25,6 @@ class FSHandlers {
         return array
     }
     
-    // Skadz 2026-11-08: really broken. oohhh lunngg!!
     func getContainerPath(at containerURL: URL = FSURL.appContainers, forMatch match: String, hashOnly: Bool = false) -> String {
         let containers = getDirPaths(containerURL.path)
         for path in containers {
@@ -41,49 +40,6 @@ class FSHandlers {
         }
         print("(fs) failed to get container for \(match)! containers: \(containerURL.path)")
         return ""
-        /*
-        let handle = wq.grantAccess(path: containerURL.path)
-        if !handle.0 {
-            print("(fs) failed to get access to containers!")
-            return ""
-        }
-        
-        var collected: [String] = []
-        do {
-            let enumerated = try fm.contentsOfDirectory(at: containerURL, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles])
-            
-            for fileURL in enumerated {
-                let resourceValues = try fileURL.resourceValues(forKeys: [.isDirectoryKey])
-                if resourceValues.isDirectory == true {
-                    collected.append(fileURL.path)
-                }
-            }
-        } catch {
-            print("Failed to load enumerate directories!")
-        }
-        
-        for path in collected {
-            guard let url = URL(string: path) else {
-                continue
-            }
-            var buf = [CChar](repeating: 0, count: 512)
-            let len = getxattr(path, "com.apple.containermanager.identifier", &buf, 511, 0, 0)
-            if len > 0 {
-                let bundleID = String(cString: buf)
-                if bundleID == match {
-                    if hashOnly {
-                        return url.lastPathComponent
-                    }
-                    return url.path
-                }
-            }
-        }
-        
-        worse_query_release(handle.1)
-        
-        print("(fs) failed to get container for \(match)! containers: \(containerURL.path)")
-        return ""
-         */
     }
     
     func openInFilesApp(_ fileURL: URL) {
