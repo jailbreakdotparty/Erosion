@@ -25,8 +25,23 @@ class FSHandlers {
         return array
     }
     
-    // Skadz 2026-11-08: really broken. oohhh lunngg!! 
+    // Skadz 2026-11-08: really broken. oohhh lunngg!!
     func getContainerPath(at containerURL: URL = FSURL.appContainers, forMatch match: String, hashOnly: Bool = false) -> String {
+        let containers = getDirPaths(containerURL.path)
+        for path in containers {
+            let url = URL(fileURLWithPath: path)
+            if let appName = folderLabel(url: url) {
+                if appName == match {
+                    if hashOnly {
+                        return url.lastPathComponent
+                    }
+                    return url.path
+                }
+            }
+        }
+        print("(fs) failed to get container for \(match)! containers: \(containerURL.path)")
+        return ""
+        /*
         let handle = wq.grantAccess(path: containerURL.path)
         if !handle.0 {
             print("(fs) failed to get access to containers!")
@@ -68,6 +83,7 @@ class FSHandlers {
         
         print("(fs) failed to get container for \(match)! containers: \(containerURL.path)")
         return ""
+         */
     }
     
     func openInFilesApp(_ fileURL: URL) {
