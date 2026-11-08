@@ -312,7 +312,7 @@ struct GestaltView: View {
                 store.mgCurrentDict = mgLoadData()
                 let isWritable = fm.isWritableFile(atPath: MGURL.fsGestaltURL.path)
                 if !isWritable {
-                    let res = BadQuery().grantAccess(atPath: MGURL.fsGestaltURL.deletingLastPathComponent().path, toFileName: "com.apple.MobileGestalt.plist")
+                    let res = wq.grantAccess(path: MGURL.fsGestaltURL.path)
                     if !res.0 {
                         Alertinator.shared.alert(title: "Failed to get write access to MobileGestalt!", body: "Tweaks will NOT apply. Maybe try restarting the app?")
                     }
@@ -395,7 +395,7 @@ struct GestaltView: View {
                 if autoRespring || isFromSheet {
                     mgr.shouldRespring = true
                 } else {
-                    Alertinator.shared.alert(title: "Successfully appiled MobileGestalt tweaks!", body: AppMsg.applied + (store.isEnabled([MGKey.appIntell]) ? "You'll have to reboot your device if you want to use Apple Intelligence." : ""), actionLabel: "Respring", action: { mgr.shouldRespring = true })
+                    Alertinator.shared.alert(title: "Successfully appiled MobileGestalt tweaks!", body: AppMsg.applied + (store.isEnabled([MGKey.appIntell]) ? " You'll have to reboot your device if you want to use Apple Intelligence." : ""), actionLabel: "Respring", action: { mgr.shouldRespring = true })
                 }
             } else {
                 throw "overwrite failed!"

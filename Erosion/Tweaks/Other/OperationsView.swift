@@ -27,7 +27,7 @@ struct OperationsView: View {
                     .disabled(isAcc)
                 HStack {
                     Button("Grant Access") {
-                        let res = bq.grantAccess(atPath: directory, toFileName: fileName)
+                        let res = wq.grantAccess(path: "\(directory)/\(fileName)")
                         if !res.0 {
                             Alertinator.shared.alert(title: "Failed to get access to target file!", body: "\(res.1): \(res.2)")
                         } else {

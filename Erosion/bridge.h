@@ -9,6 +9,8 @@
 #define bridge_h
 
 #import "Exploits/bad_query.h"
+#import "Exploits/worse_query.h"
+#import "Exploits/pathleak.h"
 #import <Foundation/Foundation.h>
 
 @interface LSApplicationWorkspace : NSObject

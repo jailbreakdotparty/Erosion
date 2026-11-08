@@ -107,7 +107,7 @@ struct ConfigView: View {
     
     private func doSetup() {
         if !fm.isWritableFile(atPath: CNURL.sharedDevConfig.path) {
-            let res = bq.grantAccess(atPath: FSURL.configProfiles.path)
+            let res = wq.grantAccess(path: FSURL.configProfiles.path)
             if !res.0 {
                 Alertinator.shared.alert(title: "Failed to get write access!", body: AppMsg.opFailed)
                 return

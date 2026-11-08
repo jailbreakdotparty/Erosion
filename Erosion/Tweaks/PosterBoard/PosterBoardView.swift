@@ -265,7 +265,7 @@ struct PosterBoardView: View {
         let descrTargets = Set(objects.map(\.targetDescr))
         for descrTarget in descrTargets {
             let target = "\(pbContainerPath)/\(descrTarget.path)"
-            let res = bq.grantAccess(atPath: target)
+            let res = wq.grantAccess(path: target)
             if !res.0 {
                 print("(mg) failed to grant access at \(target): \(res.2)")
                 return (false, res.2)

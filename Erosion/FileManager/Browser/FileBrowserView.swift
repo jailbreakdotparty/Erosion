@@ -270,7 +270,7 @@ struct FileBrowserView: View {
                 // do nothing as it's already being stored in the variable
             } else {
                 if shouldGrant {
-                    let res = bq.grantAccess(atPath: path.path)
+                    let res = wq.grantAccess(path: path.path)
                     if res.0 {
                         loadFilesFromPath()
                     } else {

@@ -50,10 +50,15 @@ func metadataID(from data: Data) -> String? {
 }
 
 func readMetaKey(at url: URL, key: String) -> String? {
-    var path_c = url.path.utf8CString.map { Int8($0) }
-    let handle = bad_query(&path_c, true, nil, false, nil)
-    guard handle >= 0 else { return nil }
-    defer { bad_query_release(handle) }
+    if url.path.contains("/var/mobile/Containers/Shared/AppGroup") && ProcessInfo.processInfo.operatingSystemVersion.majorVersion == 26 {
+        let handle = worse_query(url.path, group, true, false)
+        guard handle >= 0 else { return nil }
+        do { worse_query_release(handle) }
+    } else {
+        let handle = worse_query(url.path, group, false, false)
+        guard handle >= 0 else { return nil }
+        do { worse_query_release(handle) }
+    }
      
     guard let data = try? Data(contentsOf: url),
           let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any] else {

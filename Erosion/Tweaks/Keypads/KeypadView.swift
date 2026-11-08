@@ -137,7 +137,7 @@ struct KeypadView: View {
                 mpContainerPath = fsHandlers.getContainerPath(forMatch: "com.apple.mobilephone")
             }
             if !fm.isReadableFile(atPath: mpContainerPath) {
-                let _ = bq.grantAccess(atPath: mpContainerPath)
+                let _ = wq.grantAccess(path: mpContainerPath)
             }
             kpMgr.getCurrentKeypads(size: size, saveOgData: true)
         }
