@@ -52,6 +52,9 @@ struct GestaltView: View {
                             if doubleSysVrs() >= 26.0 {
                                 Text("iPhone Air").tag(2736)
                             }
+                            if doubleSysVrs() >= 27.0 {
+                                Text("iPhone 18 Pro Max").tag(2670)
+                            }
                             if isHomeButtonHD() {
                                 Text("iPhone X Gestures").tag(2436)
                             }
@@ -140,6 +143,11 @@ struct GestaltView: View {
                                     Text("iPhone 17 Pro").tag("iPhone18,1")
                                     Text("iPhone 17 Pro Max").tag("iPhone18,2")
                                     Text("iPhone Air").tag("iPhone18,4")
+                                }
+                                if doubleSysVrs() >= 27.0 {
+                                    Text("iPhone 18 Pro").tag("iPhone19,2")
+                                    Text("iPhone 18 Pro Max").tag("iPhone19,3")
+                                    Text("iPhone Duo").tag("iPhone19,4")
                                 }
                             }
                         }
