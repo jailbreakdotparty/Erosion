@@ -385,7 +385,7 @@ struct GestaltView: View {
                 cacheExtra[MGKey.prodType] = mgProductType
                 for item in customKeys {
                     if item.isOn {
-                        cacheExtra[item.key] = true
+                        cacheExtra[item.key] = item.value
                     } else {
                         cacheExtra.removeObject(forKey: item.key)
                     }
