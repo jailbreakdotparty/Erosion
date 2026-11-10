@@ -12,6 +12,7 @@ import PhotosUI
 struct KeypadView: View {
     @StateObject private var kpMgr = KeypadManager.shared
     @AppStorage("mpContainerPath") private var mpContainerPath = ""
+    @State private var isReady = false
     let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
     @State private var size: KPSize = KPSize.defSize
     @State private var showSizeAlert = false
@@ -21,60 +22,70 @@ struct KeypadView: View {
     
     var body: some View {
         VStack {
-            LazyVGrid(columns: columns, alignment: .center, spacing: 16) {
-                ForEach($kpMgr.mpKeypad) { $item in
-                    KeyItem(size: $size, kpID: item.kpID, imgData: $item.imgData)
-                        .environmentObject(kpMgr)
+            if !isReady {
+                VStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(1.25)
+                    Text("Getting Container Path...")
+                        .foregroundStyle(.secondary)
                 }
-            }
-            .safeAreaInset(edge: .top) {
-                VStack(spacing: 2) {
-                    Text("Key Size")
-                    Picker("", selection: $size) {
-                        ForEach(KPSize.allCases, id: \.self) { kpSize in
-                            Text(kpSize.label + (kpSize == .custom ? " (\(custW)x\(custH))" : "")).tag(kpSize)
+                .frame(maxWidth: .infinity)
+            } else {
+                LazyVGrid(columns: columns, alignment: .center, spacing: 16) {
+                    ForEach($kpMgr.mpKeypad) { $item in
+                        KeyItem(size: $size, kpID: item.kpID, imgData: $item.imgData)
+                            .environmentObject(kpMgr)
+                    }
+                }
+                .safeAreaInset(edge: .top) {
+                    VStack(spacing: 2) {
+                        Text("Key Size")
+                        Picker("", selection: $size) {
+                            ForEach(KPSize.allCases, id: \.self) { kpSize in
+                                Text(kpSize.label + (kpSize == .custom ? " (\(custW)x\(custH))" : "")).tag(kpSize)
+                            }
+                        }
+                        .alert("What would you like the custom size to be?", isPresented: $showSizeAlert) {
+                            TextField("Width", value: $custW, format: .number)
+                                .keyboardType(.numberPad)
+                            TextField("Height", value: $custH, format: .number)
+                                .keyboardType(.numberPad)
+                            Button("Cancel", role: .cancel) {
+                                size = .defSize
+                            }
+                            Button("Set") {
+                                kpMgr.changeSizeOfKeypads(size: size, custW: custW, custH: custH)
+                            }
+                        }
+                        .onChange(of: size) { _, newSize in
+                            if newSize != KPSize.custom {
+                                kpMgr.changeSizeOfKeypads(size: newSize)
+                            } else {
+                                showSizeAlert.toggle()
+                            }
                         }
                     }
-                    .alert("What would you like the custom size to be?", isPresented: $showSizeAlert) {
-                        TextField("Width", value: $custW, format: .number)
-                            .keyboardType(.numberPad)
-                        TextField("Height", value: $custH, format: .number)
-                            .keyboardType(.numberPad)
-                        Button("Cancel", role: .cancel) {
-                            size = .defSize
-                        }
-                        Button("Set") {
-                            kpMgr.changeSizeOfKeypads(size: size, custW: custW, custH: custH)
-                        }
-                    }
-                    .onChange(of: size) { _, newSize in
-                        if newSize != KPSize.custom {
-                            kpMgr.changeSizeOfKeypads(size: newSize)
+                    .padding(6)
+                    .background(Color(.systemBackground), in: .rect(cornerRadius: cornerRad.component))
+                }
+                .safeAreaInset(edge: .bottom) {
+                    Button {
+                        let res = kpMgr.applyKeypadItems()
+                        if res {
+                            Alertinator.shared.alert(title: "Successfully applied custom keypads!", body: KPMsg.applyComp, actionLabel: "Open Phone", action: {
+                                openApp(withBID: SysBID.phone)
+                            })
+                            Haptic.shared.play(.soft)
                         } else {
-                            showSizeAlert.toggle()
+                            Alertinator.shared.alert(title: "Failed to apply custom keypads!", body: AppMsg.opFailed)
                         }
+                    } label: {
+                        Image(systemName: "checkmark")
                     }
+                    .buttonStyle(KeypadButtonStyle(isConfirm: true))
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 10)
                 }
-                .padding(6)
-                .background(Color(.systemBackground), in: .rect(cornerRadius: cornerRad.component))
-            }
-            .safeAreaInset(edge: .bottom) {
-                Button {
-                    let res = kpMgr.applyKeypadItems()
-                    if res {
-                        Alertinator.shared.alert(title: "Successfully applied custom keypads!", body: KPMsg.applyComp, actionLabel: "Open Phone", action: {
-                            openApp(withBID: SysBID.phone)
-                        })
-                        Haptic.shared.play(.soft)
-                    } else {
-                        Alertinator.shared.alert(title: "Failed to apply custom keypads!", body: AppMsg.opFailed)
-                    }
-                } label: {
-                    Image(systemName: "checkmark")
-                }
-                .buttonStyle(KeypadButtonStyle(isConfirm: true))
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 10)
             }
         }
         .navigationTitle(isPad() ? "" : "Dialer Themer")
@@ -124,22 +135,27 @@ struct KeypadView: View {
                     Label("Menu", systemImage: "ellipsis")
                         .labelStyle(.iconOnly)
                 }
+                .disabled(!isReady)
             }
             ToolbarSpacer(placement: .topBarTrailing)
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Import") {
                     showFileImporter = true
                 }
+                .disabled(!isReady)
             }
         }
         .onAppear {
-            if mpContainerPath.isEmpty {
-                mpContainerPath = fsHandlers.getContainerPath(forMatch: "com.apple.mobilephone")
+            DispatchQueue.global(qos: .userInitiated).async {
+                if mpContainerPath.isEmpty {
+                    mpContainerPath = fsHandlers.getContainerPath(forMatch: "com.apple.mobilephone")
+                }
+                if !fm.isReadableFile(atPath: mpContainerPath) {
+                    let _ = wq.grantAccess(path: mpContainerPath)
+                }
+                kpMgr.getCurrentKeypads(size: size, saveOgData: true)
+                isReady = true
             }
-            if !fm.isReadableFile(atPath: mpContainerPath) {
-                let _ = wq.grantAccess(path: mpContainerPath)
-            }
-            kpMgr.getCurrentKeypads(size: size, saveOgData: true)
         }
         .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.item]) { result in
             handleImport(result)

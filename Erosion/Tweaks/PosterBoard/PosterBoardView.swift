@@ -23,6 +23,7 @@ enum PBMsg {
 
 struct PosterBoardView: View {
     @AppStorage("pbContainerPath") private var pbContainerPath = ""
+    @State private var isReady = false
     @AppStorage("tendiesArray") private var tendiesArray: [TendiesObject] = []
     @AppStorage("hasShownFirstRunMsg") private var hasShownFirstRunMsg = false
     
@@ -30,111 +31,127 @@ struct PosterBoardView: View {
     let columns = Array(repeating: GridItem(.flexible()), count: device.userInterfaceIdiom == .pad ? 4 : 2)
     
     var body: some View {
-        ScrollView {
-            if tendiesArray.isEmpty {
-                Button {
-                    showImporter = true
-                } label: {
-                    VStack(alignment: .leading) {
-                        CompactAlert(title: "No tendies imported!", symbol: "exclamationmark.triangle.fill", text: PBMsg.noTendies)
-                            .padding(.horizontal, 15)
-                    }
-                    .frame(alignment: .leading)
-                    .multilineTextAlignment(.leading)
+        Group {
+            if !isReady {
+                VStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(1.25)
+                    Text("Getting Container Path...")
+                        .foregroundStyle(.secondary)
                 }
-            }
-            LazyVGrid(columns: columns) {
-                ForEach($tendiesArray) { $tendies in
-                    Button {
-                        if !tendies.isOn && tendiesArray.filter({ $0.isOn }).flatMap({ $0.descrNames }).count > 15 {
-                            Alertinator.shared.alert(title: "Max wallpaper limit reached!", body: PBMsg.tooManyTendies)
-                        } else {
-                            tendies.isOn.toggle()
-                        }
-                    } label: {
-                        VStack(spacing: 8) {
-                            Image(systemName: tendies.targetDescr == .photos ? "play.rectangle" : "photo")
-                                .imageScale(.large)
-                                .foregroundStyle(Color.accentColor)
-                            VStack {
-                                Text(tendies.name)
-                                    .lineLimit(1)
-                                    .fontWeight(.medium)
-                                Text("\(tendies.descrNames.count) wallpaper" + (tendies.descrNames.count == 1 ? "" : "s"))
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+            } else {
+                ScrollView {
+                    if tendiesArray.isEmpty {
+                        Button {
+                            showImporter = true
+                        } label: {
+                            VStack(alignment: .leading) {
+                                CompactAlert(title: "No tendies imported!", symbol: "exclamationmark.triangle.fill", text: PBMsg.noTendies)
+                                    .padding(.horizontal, 15)
                             }
+                            .frame(alignment: .leading)
+                            .multilineTextAlignment(.leading)
                         }
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding()
-                        .padding(.vertical, 10)
-                        .background {
-                            if tendies.targetDescr == .mercury {
-                                VStack {
-                                    Text("M")
-                                        .font(.footnote)
-                                        .padding(6)
-                                        .background(Color.accentColor)
-                                        .clipShape(.circle)
-                                    Spacer()
+                    }
+                    LazyVGrid(columns: columns) {
+                        ForEach($tendiesArray) { $tendies in
+                            Button {
+                                if !tendies.isOn && tendiesArray.filter({ $0.isOn }).flatMap({ $0.descrNames }).count > 15 {
+                                    Alertinator.shared.alert(title: "Max wallpaper limit reached!", body: PBMsg.tooManyTendies)
+                                } else {
+                                    tendies.isOn.toggle()
                                 }
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                                .frame(maxHeight: .infinity)
-                                .padding(12)
-                            }
-                        }
-                        .background {
-                            RoundedRectangle(cornerRadius: 26)
-                                .fill(Color(.secondarySystemBackground))
-                                .overlay {
-                                    if tendies.isOn {
-                                        RoundedRectangle(cornerRadius: 26)
-                                            .fill(Color.clear)
-                                            .strokeBorder(lineWidth: 2)
-                                            .foregroundStyle(Color.accentColor)
+                            } label: {
+                                VStack(spacing: 8) {
+                                    Image(systemName: tendies.targetDescr == .photos ? "play.rectangle" : "photo")
+                                        .imageScale(.large)
+                                        .foregroundStyle(Color.accentColor)
+                                    VStack {
+                                        Text(tendies.name)
+                                            .lineLimit(1)
+                                            .fontWeight(.medium)
+                                        Text("\(tendies.descrNames.count) wallpaper" + (tendies.descrNames.count == 1 ? "" : "s"))
+                                            .font(.footnote)
+                                            .foregroundStyle(.secondary)
                                     }
                                 }
-                        }
-                        .contextMenu {
-                            Button {
-                                let url = AppURL.pbFolders.appendingPathComponent(tendies.folderName)
-                                fsHandlers.openInFilesApp(url)
-                            } label: {
-                                Label("Show Data Folder", systemImage: "folder")
-                            }
-                            
-                            Button(role: .destructive) {
-                                withAnimation {
-                                    let url = AppURL.pbFolders.appendingPathComponent(tendies.folderName)
-                                    try? fm.removeItem(at: url)
-                                    tendiesArray.removeAll { $0.id == tendies.id }
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding()
+                                .padding(.vertical, 10)
+                                .background {
+                                    if tendies.targetDescr == .mercury {
+                                        VStack {
+                                            Text("M")
+                                                .font(.footnote)
+                                                .padding(6)
+                                                .background(Color.accentColor)
+                                                .clipShape(.circle)
+                                            Spacer()
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .trailing)
+                                        .frame(maxHeight: .infinity)
+                                        .padding(12)
+                                    }
                                 }
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                                .background {
+                                    RoundedRectangle(cornerRadius: 26)
+                                        .fill(Color(.secondarySystemBackground))
+                                        .overlay {
+                                            if tendies.isOn {
+                                                RoundedRectangle(cornerRadius: 26)
+                                                    .fill(Color.clear)
+                                                    .strokeBorder(lineWidth: 2)
+                                                    .foregroundStyle(Color.accentColor)
+                                            }
+                                        }
+                                }
+                                .contextMenu {
+                                    Button {
+                                        let url = AppURL.pbFolders.appendingPathComponent(tendies.folderName)
+                                        fsHandlers.openInFilesApp(url)
+                                    } label: {
+                                        Label("Show Data Folder", systemImage: "folder")
+                                    }
+                                    
+                                    Button(role: .destructive) {
+                                        withAnimation {
+                                            let url = AppURL.pbFolders.appendingPathComponent(tendies.folderName)
+                                            try? fm.removeItem(at: url)
+                                            tendiesArray.removeAll { $0.id == tendies.id }
+                                        }
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
                             }
                         }
                     }
+                    .padding(.horizontal, 15)
+                    .foregroundStyle(Color(.label))
                 }
             }
-            .padding(.horizontal, 15)
-            .foregroundStyle(Color(.label))
         }
         .navigationTitle("Wallpapers")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            doSetupStuff()
+            DispatchQueue.global(qos: .userInitiated).async {
+                doSetupStuff()
+            }
         }
         .safeAreaInset(edge: .bottom) {
-            VStack {
-                Button {
-                    showImporter = true
-                } label: {
-                    ButtonLabel("Import .tendies", symbol: "arrow.down.doc")
+            if isReady {
+                VStack {
+                    Button {
+                        showImporter = true
+                    } label: {
+                        ButtonLabel("Import .tendies", symbol: "arrow.down.doc")
+                    }
                 }
+                .buttonStyle(ActionButtonStyle())
+                .frame(maxWidth: .infinity)
+                .padding(device.userInterfaceIdiom == .pad ? 0 : 15)
             }
-            .buttonStyle(ActionButtonStyle())
-            .frame(maxWidth: .infinity)
-            .padding(device.userInterfaceIdiom == .pad ? 0 : 15)
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -144,6 +161,7 @@ struct PosterBoardView: View {
                     } label: {
                         Label("Import .tendies", systemImage: "arrow.down.doc")
                     }
+                    .disabled(!isReady)
                     
                     Button {
                         openApp(withBID: SysBID.poster)
@@ -259,6 +277,7 @@ struct PosterBoardView: View {
                 Alertinator.shared.alert(title: "Failed to setup PosterBoard tweaks!", body: AppMsg.opFailed)
             }
         }
+        isReady = true
     }
     
     private func applyObjects(_ objects: [TendiesObject]) -> (Bool, String) {
