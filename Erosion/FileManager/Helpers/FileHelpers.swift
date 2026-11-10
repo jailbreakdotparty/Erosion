@@ -97,7 +97,7 @@ func zipFile(_ url: URL) -> Bool {
         let zipDest = url
             .deletingLastPathComponent()
             .appendingPathComponent(url.lastPathComponent + ".zip")
-        try Compression.shared.compress(paths: [url], outputPath: zipDest, format: .tar)
+        try Compression.shared.compress(paths: [url], outputPath: zipDest, format: .zip)
         return true
     } catch {
         print("(fm) failed to zip file: \(error.localizedDescription)")

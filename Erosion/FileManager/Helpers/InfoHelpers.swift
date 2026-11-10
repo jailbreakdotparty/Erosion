@@ -37,7 +37,7 @@ func getBIDFromXattr(_ url: URL) -> String? {
         
         let bid = String(cString: buf)
         
-        worse_query_release(handle)
+        wq.releaseHandle(handle)
         
         if !bid.isEmpty {
             return bid
