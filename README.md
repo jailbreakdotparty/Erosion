@@ -4,7 +4,7 @@
   <br>
   <h1>Erosion</h1>
   <p>iOS customization toolbox using the <a href="https://github.com/forcequitOS/worse_query">worse_query</a> sandbox escape.</p>
-  <p>Supports iOS 26.0 - 26.7.2 & iOS 27.0 - 27.2.</p>
+  <p>Supports iOS 26.0 - 26.7.2 & iOS 27.0 - 27.2.1.</p>
   <a href="https://github.com/jailbreakdotparty/Erosion/releases/latest"><img alt="GitHub Downloads (all assets, all releases)" src="https://img.shields.io/github/downloads/jailbreakdotparty/Erosion/total?style=flat-square&color=CF7D46"></a>
   <a href="https://github.com/jailbreakdotparty/Erosion/stargazers"> <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/jailbreakdotparty/erosion?style=flat-square&color=%23FFD300"></a> 
   <a href="https://jailbreak.party/discord"><img alt="Discord" src="https://img.shields.io/discord/1349128546072793218?style=flat-square&logo=discord&logoColor=FFFFFF&color=5865F2"></a> 
@@ -19,7 +19,7 @@
 >[!NOTE]
 >If your version doesn't show up on this list, your device is not supported. **Do not ask us for any support regarding extending version support!** Exploits that apps like these rely on are very rare to come by, so there's nothing we can do if your device isn't supported.
 - iOS/iPadOS 26.0 - 26.6.2 **(limited functionality, e.g. no gestalt tweaks)**
-- iOS/iPadOS 27.0 - 27.2
+- iOS/iPadOS 27.0 - 27.2.1
 - iOS/iPadOS 27.3 beta 1 (24C5037i)
 
 At the time of writing (2026-11-08), worse_query has not been patched in any new software releases by Apple, so it works on all available versions.
