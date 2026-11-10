@@ -25,4 +25,8 @@ CFTypeRef _Nullable SecTaskCopyValueForEntitlement(SecTaskRef _Nonnull task, CFS
 - (bool)openApplicationWithBundleID:(NSString*)bundleID;
 @end
 
+// Read object-table references without unarchiving private PosterKit classes.
+CFTypeID _CFKeyedArchiverUIDGetTypeID(void);
+uint32_t _CFKeyedArchiverUIDGetValue(CFTypeRef _Nonnull uid);
+
 #endif /* bridge_h */

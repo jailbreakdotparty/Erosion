@@ -297,7 +297,7 @@ struct PosterBoardView: View {
                 let descrURL = AppURL.pbFolders.appendingPathComponent(object.folderName).appendingPathComponent(descr)
                 let target = object.targetDescr == .mercury ? URL(fileURLWithPath: container).appendingPathComponent(descrURL.lastPathComponent) : URL(fileURLWithPath: container).appendingPathComponent(UUID().uuidString)
                 do {
-                    try fm.copyItem(at: descrURL, to: target)
+                    try pbHandler.copyDescriptor(at: descrURL, to: target, for: object.targetDescr)
                 } catch {
                     print("(mg) failed to copy descriptor (folder: \(object.folderName)): \(error.localizedDescription)")
                     return (false, error.localizedDescription)
