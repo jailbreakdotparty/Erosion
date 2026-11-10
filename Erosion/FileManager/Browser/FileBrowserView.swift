@@ -307,7 +307,7 @@ struct FileBrowserView: View {
             do {
                 var unsortedFiles: [FileItem] = []
                 if isContainer {
-                    let paths = fsHandlers.getDirPaths(path.path, maxInode: Int64(maxInode))
+                    let paths = fsHandlers.getDirPaths(path.path)
                     for path in paths {
                         unsortedFiles.append(getFileItem(at: URL(fileURLWithPath: path), isContainer: true))
                     }

@@ -8,7 +8,6 @@
 import SwiftUI
 
 import QuickLook
-import ZIPFoundation
 
 struct FileRow: View {
     @EnvironmentObject var mgr: ErosionManager

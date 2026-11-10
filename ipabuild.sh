@@ -41,7 +41,7 @@ xcodebuild -project "$WORKING_LOCATION/$APPLICATION_NAME.xcodeproj" \
     -configuration Release \
     -derivedDataPath "$WORKING_LOCATION/build/DerivedDataApp" \
     -destination 'generic/platform=iOS' \
-    build \
+    clean build \
     CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGN_ENTITLEMENTS="" CODE_SIGNING_ALLOWED="NO" ASSETCATALOG_COMPILER_OPTIMIZATION=space DEPLOYMENT_POSTPROCESSING=YES STRIP_SWIFT_SYMBOLS=YES SEPARATE_STRIP=YES STRIP_STYLE=all
 
 DD_APP_PATH="$WORKING_LOCATION/build/DerivedDataApp/Build/Products/Release-iphoneos/$APPLICATION_NAME.app"

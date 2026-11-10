@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1541E9D33036B49300C8AF93 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 1541E9D23036B49300C8AF93 /* ZIPFoundation */; };
-		1541E9D63036B56800C8AF93 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1541E9D53036B56800C8AF93 /* MobileCoreServices.framework */; };
+		43897AF630A1669200AE7878 /* libarchive.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 43897AF530A1669200AE7878 /* libarchive.tbd */; };
+		43897B0330A17F0D00AE7878 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43897B0230A17F0D00AE7878 /* MobileCoreServices.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		151457FF302FE21A00DDFE07 /* Erosion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Erosion.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		1541E9D53036B56800C8AF93 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
+		43897AF530A1669200AE7878 /* libarchive.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libarchive.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk/usr/lib/libarchive.tbd; sourceTree = DEVELOPER_DIR; };
+		43897B0230A17F0D00AE7878 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -42,8 +43,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1541E9D63036B56800C8AF93 /* MobileCoreServices.framework in Frameworks */,
-				1541E9D33036B49300C8AF93 /* ZIPFoundation in Frameworks */,
+				43897B0330A17F0D00AE7878 /* MobileCoreServices.framework in Frameworks */,
+				43897AF630A1669200AE7878 /* libarchive.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +71,8 @@
 		1541E9D43036B56800C8AF93 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				1541E9D53036B56800C8AF93 /* MobileCoreServices.framework */,
+				43897B0230A17F0D00AE7878 /* MobileCoreServices.framework */,
+				43897AF530A1669200AE7878 /* libarchive.tbd */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -95,7 +97,6 @@
 			);
 			name = Erosion;
 			packageProductDependencies = (
-				1541E9D23036B49300C8AF93 /* ZIPFoundation */,
 			);
 			productName = Erosion;
 			productReference = 151457FF302FE21A00DDFE07 /* Erosion.app */;
@@ -127,7 +128,6 @@
 			mainGroup = 151457F6302FE21A00DDFE07;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				1541E9D13036B49300C8AF93 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 15145800302FE21A00DDFE07 /* Products */;
@@ -292,7 +292,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 7PL9H849WB;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -315,8 +315,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 0.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jbdotparty.Erosion;
+				MARKETING_VERSION = 0.3.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jbdotparty.ErosionWQ;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -345,7 +345,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 7PL9H849WB;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -368,8 +368,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 0.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jbdotparty.Erosion;
+				MARKETING_VERSION = 0.3.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jbdotparty.ErosionWQ;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -409,25 +409,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		1541E9D13036B49300C8AF93 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.9.20;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		1541E9D23036B49300C8AF93 /* ZIPFoundation */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1541E9D13036B49300C8AF93 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
-			productName = ZIPFoundation;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 151457F7302FE21A00DDFE07 /* Project object */;
 }

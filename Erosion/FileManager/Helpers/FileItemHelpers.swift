@@ -36,7 +36,7 @@ func getFileItem(at url: URL, isContainer: Bool = false) -> FileItem {
     var item = FileItem(name: url.lastPathComponent, fileURL: url, destURL: url, type: .file, uttype: .data, size: 0, creationDate: Date(), modifiedDate: Date(), creationDateStr: "", modifiedDateStr: "", hidden: false, posixPerms: "", owner: "", group: "", readable: false, writable: false, executable: false)
     
     if isContainer {
-        if let folderName = folderLabel(url: url) {
+        if let folderName = getBIDFromXattr(url) {
             item.name = folderName
         }
     }

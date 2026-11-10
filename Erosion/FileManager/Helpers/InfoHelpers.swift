@@ -22,49 +22,28 @@ func getFolderType(url: URL) -> FolderType {
     return .normal
 }
 
-// this is awful
+// skidded from worse_query. thx forcequit 1000x!!
 func getBIDFromXattr(_ url: URL) -> String? {
-    wq.grantAccess(path: url.path)
+    let handle = wq.grantAccess(path: url.path).1
     
-    var buf = [UInt8](repeating: 0, count: 512)
-    
-    let len = buf.withUnsafeMutableBytes {
-        getxattr(url.path, "com.apple.containermanager.identifier", $0.baseAddress, 511, 0, XATTR_NOFOLLOW)
-    }
-    if len < 0 {
-        print("failed to read xattr: \(String(cString: strerror(errno))) (errno \(errno))")
-        return nil
-    }
-    let bid = String(cString: buf)
-    
-    if !bid.isEmpty {
-        return bid
+    if handle > 0 {
+        var buf = [CChar](repeating: 0, count: 512)
+        let len = getxattr(url.path, "com.apple.containermanager.identifier", &buf, 511, 0, 0)
+        
+        if len < 0 {
+            print("failed to read xattr: \(String(cString: strerror(errno))) (errno \(errno))")
+            return nil
+        }
+        
+        let bid = String(cString: buf)
+        
+        worse_query_release(handle)
+        
+        if !bid.isEmpty {
+            return bid
+        }
     }
     return nil
-}
-
-// i don't know why root's works and mine doesn't, but i'm stealing it.
-func folderLabel(url: URL) -> String? {
-    /*
-    let candidates = [
-        url.appendingPathComponent(".com.apple.mobile_container_manager.metadata.plist"),
-        url.appendingPathComponent("com.apple.mobile_container_manager.metadata.plist")
-    ]
-
-    for url in candidates {
-        if let data = try? Data(contentsOf: url), let id = metadataID(from: data) {
-            return id
-        }
-    }
-
-    for url in candidates {
-        if let id = readMetaKey(at: url, key: "MCMMetadataIdentifier") {
-            return id
-        }
-    }
-     */
-
-    return getBIDFromXattr(url)
 }
 
 func metadataID(from data: Data) -> String? {

@@ -8,7 +8,7 @@
 #ifndef bridge_h
 #define bridge_h
 
-#import "Exploits/bad_query.h"
+#import "Libraries/libarchive/libarchive.h"
 #import "Exploits/worse_query.h"
 #import "Exploits/pathleak.h"
 #import <Foundation/Foundation.h>

@@ -8,7 +8,6 @@
 import Combine
 import Foundation
 import UIKit
-import ZIPFoundation
 
 // i hate you, apple incorporated.
 // with love, lunginspector. august 28th, 2026.
@@ -245,7 +244,7 @@ final class KeypadManager: ObservableObject {
             // create a temp dir for extraction
             var filesURL = URL.temporaryDirectory.appendingPathComponent(fileURL.deletingPathExtension().lastPathComponent + "_\(UUID())_EROSIONTMP")
             try fm.createDirectory(at: filesURL, withIntermediateDirectories: true)
-            try fm.unzipItem(at: fileURL, to: filesURL)
+            try Compression.shared.extract(path: fileURL, to: filesURL)
             let dirURLs = try fm.contentsOfDirectory(at: filesURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             if dirURLs.count < 1 {
                 throw "no files found inside of extracted folder!"

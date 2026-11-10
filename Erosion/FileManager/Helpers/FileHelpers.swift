@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import ZIPFoundation
 import UniformTypeIdentifiers
 
 extension FileManager {
@@ -98,7 +97,7 @@ func zipFile(_ url: URL) -> Bool {
         let zipDest = url
             .deletingLastPathComponent()
             .appendingPathComponent(url.lastPathComponent + ".zip")
-        try FileManager.default.zipItem(at: url, to: zipDest, shouldKeepParent: true)
+        try Compression.shared.compress(paths: [url], outputPath: zipDest, format: .tar)
         return true
     } catch {
         print("(fm) failed to zip file: \(error.localizedDescription)")
@@ -110,7 +109,7 @@ func unzipFile(_ url: URL) -> Bool {
     do {
         let unzipDest = url.deletingLastPathComponent()
         try fm.createDirectory(at: unzipDest, withIntermediateDirectories: true)
-        try fm.unzipItem(at: url, to: unzipDest)
+        try Compression.shared.extract(path: url, to: unzipDest)
         return true
     } catch {
         print("(fm) failed to uncompress file: \(error.localizedDescription)")

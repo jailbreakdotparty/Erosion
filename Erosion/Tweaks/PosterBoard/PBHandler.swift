@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import ZIPFoundation
 
 struct TendiesObject: Identifiable, Codable {
     var id = UUID()
@@ -33,7 +32,7 @@ final class PBHandler {
     func makeObjectFromTendies(at url: URL) -> TendiesObject? {
         let rawURL = URL.temporaryDirectory.appendingPathComponent("ImportedTendies_\(url.lastPathComponent)_\(UUID())")
         do {
-            try fm.unzipItem(at: url, to: rawURL)
+            try Compression.shared.extract(path: url, to: rawURL)
             
             // before anything else, we need to get the urls at which the descriptors are stored. the only problem: importing this SUCKS SO MUCH BECAUSE NO ONE MADE A SPECIFIC FORMAT THAT .tendies SHOULD BE STRUCTRED IN!!!
             // this won't be fun.

@@ -11,25 +11,47 @@ import UIKit
 let fsHandlers = FSHandlers()
 
 class FSHandlers {
-    func getDirPaths(_ path: String, maxInode: Int64 = 10000000) -> [String] {
-        var array = [""]
-        path.withCString { path in
-            guard let res = bad_query_list(UnsafeMutablePointer(mutating: path), maxInode) else {
-                return
-            }
-            defer { free(res) }
+    func getDirPaths(_ path: String) -> [String] {
+        // skidded from worse_query. thx forcequit 1000x!!
+        let baselineURL = fm.temporaryDirectory.appendingPathComponent(".baseline_\(UUID().uuidString)")
+        var baselineInode: UInt64 = 0
+        var paths: [String] = []
+        
+        do {
+            try "thxforcequit".write(to: baselineURL, atomically: true, encoding: .utf8)
+            var baselineInfo = stat()
+            let baselinePath = baselineURL.path
             
-            let string = String(cString: res)
-            array = string.split(separator: "\n", omittingEmptySubsequences: true).map(String.init)
+            if stat(baselinePath, &baselineInfo) == 0 {
+                baselineInode = baselineInfo.st_ino
+                print("(fs) baseline: \(baselineInode)")
+            } else {
+                print("(fs) Failed to get baseline inode!")
+            }
+            
+            try fm.removeItem(at: baselineURL)
+        } catch {
+            print("(fs) Failed to get baseline inode: \(error)")
+            return []
         }
-        return array
+        
+        print("(fs) pathleaking \(path)")
+        let leakedPaths = pathleak(path, baselineInode) ?? []
+        print("(fs) got \(leakedPaths.count) paths via pathleak")
+        paths = leakedPaths
+        
+        if paths.count == 0 {
+            print("(fs) got no paths! something went wrong.")
+        }
+        
+        return paths
     }
     
     func getContainerPath(at containerURL: URL = FSURL.appContainers, forMatch match: String, hashOnly: Bool = false) -> String {
         let containers = getDirPaths(containerURL.path)
         for path in containers {
             let url = URL(fileURLWithPath: path)
-            if let appName = folderLabel(url: url) {
+            if let appName = getBIDFromXattr(url) {
                 if appName == match {
                     if hashOnly {
                         return url.lastPathComponent

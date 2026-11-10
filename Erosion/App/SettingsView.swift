@@ -24,6 +24,7 @@ struct SettingsView: View {
                 
                 Section {
                     AppInfoCell(build: build)
+                    NavigationLink(destination: AcknowledgementsView(), label: { Text("Acknowledgements") })
                 } header: {
                     HeaderLabel("About", symbol: "info.circle")
                 } footer: {
@@ -32,7 +33,7 @@ struct SettingsView: View {
                 
                 Section {
                     LinkCreditCell(image: Image("lunginspector"), name: "lunginspector", description: "Primary developer and maintainer.", url: "https://github.com/lunginspector")
-                    LinkCreditCell(image: Image("forcequit"), name: "forcequit", description: "worse_query sandbox escape.", url: "https://github.com/forcequitOS")
+                    LinkCreditCell(image: Image("forcequit"), name: "forcequit", description: "worse_query sandbox escape and container enumeration strategy.", url: "https://github.com/forcequitOS")
                     LinkCreditCell(image: Image("0xjohnny"), name: "0xjohnny", description: "worse_query sandbox escape.", url: "https://github.com/0xjohnnydev")
                     LinkCreditCell(image: Image("skadz108"), name: "Skadz", description: "Exploit implementation, backend functions, and project maintainer.", url: "https://github.com/skadz108")
                     LinkCreditCell(image: Image("rooootdev"), name: "rooootdev", description: "Various backend components.", url: "https://github.com/rooootdev")
@@ -53,4 +54,47 @@ struct SettingsView: View {
             }
         }
     }
+}
+
+// Skadz 2026-11-09: pretty disgusting but its what we doing.
+struct AcknowledgementsView: View {
+    var body: some View {
+        NavigationStack {
+            VStack {
+                List {
+                    NavigationLink(destination: {
+                        VStack {
+                            ScrollView {
+                                VStack {
+                                    Text(try! String(contentsOf: Bundle.main.url(forResource: "worse_query_LICENSE", withExtension: "txt")!, encoding: .utf8))
+                                        .multilineTextAlignment(.leading)
+                                        .font(.system(size: 14))
+                                }
+                                .navigationTitle("worse_query")
+                            }
+                        }
+                    }, label: { Text("worse_query")})
+                    
+                    NavigationLink(destination: {
+                        VStack {
+                            ScrollView {
+                                VStack {
+                                    Text(try! String(contentsOf: Bundle.main.url(forResource: "PrivateKits_LICENSE", withExtension: "txt")!, encoding: .utf8))
+                                        .multilineTextAlignment(.leading)
+                                        .font(.system(size: 14))
+                                }
+                                .navigationTitle("PrivateKits")
+                            }
+                        }
+                    }, label: { Text("PrivateKits")})
+                }
+            }
+            .navigationTitle("Acknowledgements")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+}
+
+#Preview {
+    SettingsView()
 }
