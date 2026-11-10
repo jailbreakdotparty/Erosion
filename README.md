@@ -34,7 +34,8 @@ Expect that to change in the short future.
 
 ### Credits
 - [lunginspector](https://github.com/lunginspector) - Primary developer and maintainer.
-- [forcequit](https://github.com/forcequitOS) & [0xjohnny](https://github.com/0xjohnnydev) - worse_query sandbox escape.
+- [forcequit](https://github.com/forcequitOS) - worse_query sandbox escape and container enumeration strategy.
+- [0xjohnny](https://github.com/0xjohnnydev) - worse_query sandbox escape.
 - [Skadz](https://github.com/skadz108) - Exploit implementation, backend functions, and project maintainer.
 - [rooootdev](https://github.com/rooootdev) - Various backend components.
 - [neonmodder123](https://github.com/neonmodder123) - Developed WebView respring method.
