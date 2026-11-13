@@ -78,7 +78,7 @@ struct ErosionApp: App {
                 print("[*] Erosion v\(AppInfo.appVersion) (\(build))")
                 print("[*] Running on \(UIDevice.current.systemName) \(UIDevice.current.systemVersion), \(machineName())")
                 if !isSupported() && !weOnADebugBuild {
-                    Alertinator.shared.alert(title: "Your \(device.systemName) version is not supported!", body: AppMsg.unsupported, showCancel: false, actionLabel: "Exit", action: { exitinator() })
+                    Alertinator.shared.alert(title: String(format: NSLocalizedString("Your %@ version is not supported!", comment: ""), device.systemName), body: AppMsg.unsupported, showCancel: false, actionLabel: "Exit", action: { exitinator() })
                 }
                 group = wq.getAppGroup()
                 if group == "group.com.jbdotparty.Erosion.WQ" && !weOnADebugBuild {

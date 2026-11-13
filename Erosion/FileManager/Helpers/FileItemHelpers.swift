@@ -92,6 +92,14 @@ func getFileItem(at url: URL, isContainer: Bool = false) -> FileItem {
 enum FileType: String {
     case file, folder, symlink
     
+    var label: String {
+        switch self {
+        case .file: return NSLocalizedString("File", comment: "")
+        case .folder: return NSLocalizedString("Folder", comment: "")
+        case .symlink: return NSLocalizedString("Symlink", comment: "")
+        }
+    }
+    
     var sortOrder: Int {
         switch self {
         case .file: return 0

@@ -40,7 +40,7 @@ struct PlainToggle: View {
                         Image(systemName: icon)
                             .frame(width: 22, height: 22, alignment: .center)
                     }
-                    Text(text)
+                    Text(LocalizedStringKey(text))
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if infoType == .info || infoType == .warning {
                         Button(action: {

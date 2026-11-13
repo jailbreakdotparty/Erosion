@@ -14,7 +14,7 @@ struct InfoSheet<CellContent: View, ButtonContent: View>: View {
     
     var body: some View {
         VStack {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.title2.weight(.semibold))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .lineLimit(1)
@@ -43,12 +43,12 @@ struct InfoSheetCell: View {
                 Image(systemName: symbol)
                     .frame(width: 24, height: 22, alignment: .center)
                     .foregroundStyle(Color.accentColor)
-                Text(title)
+                Text(LocalizedStringKey(title))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .font(.body.weight(.medium))
             
-            Text(context)
+            Text(LocalizedStringKey(context))
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)

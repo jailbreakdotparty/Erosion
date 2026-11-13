@@ -71,7 +71,7 @@ struct PosterBoardView: View {
                                         Text(tendies.name)
                                             .lineLimit(1)
                                             .fontWeight(.medium)
-                                        Text("\(tendies.descrNames.count) wallpaper" + (tendies.descrNames.count == 1 ? "" : "s"))
+                                        Text(tendies.descrNames.count == 1 ? String(localized: "1 wallpaper") : String(localized: "\(tendies.descrNames.count) wallpapers"))
                                             .font(.footnote)
                                             .foregroundStyle(.secondary)
                                     }

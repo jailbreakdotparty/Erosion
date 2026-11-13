@@ -60,11 +60,11 @@ enum KPSize: Int, CaseIterable {
     
     var label: String {
         switch self {
-        case .defSize: return "Default"
-        case .small: return "Small"
-        case .medium: return "Medium"
-        case .large: return "Large"
-        case .custom: return "Custom"
+        case .defSize: return NSLocalizedString("Default", comment: "")
+        case .small: return NSLocalizedString("Small", comment: "")
+        case .medium: return NSLocalizedString("Medium", comment: "")
+        case .large: return NSLocalizedString("Large", comment: "")
+        case .custom: return NSLocalizedString("Custom", comment: "")
         }
     }
 }

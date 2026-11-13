@@ -18,7 +18,7 @@ final class PlistManager: ObservableObject {
     init() {}
     
     func loadPlistItems() -> Bool {
-        plistArray = [PlistItem(key: "Root", value: [], isExpanded: true)]
+        plistArray = [PlistItem(key: NSLocalizedString("Root", comment: ""), value: [], isExpanded: true)]
         if let rawDict = getFileDict(url) {
             for key in rawDict.keys {
                 if let value = rawDict[key] {
@@ -125,7 +125,7 @@ struct PlistItem: Identifiable {
             self.stringVal = v.description
         case let v as [Any]:
             self.dictVal = v.enumerated().map { index, value in
-                var newItem = PlistItem(key: "Item \(index)", value: value)
+                var newItem = PlistItem(key: String(format: NSLocalizedString("Item %lld", comment: ""), index), value: value)
                 newItem.index = index
                 return newItem
             }
@@ -177,14 +177,14 @@ enum PlistItemType: String, CaseIterable {
     
     var label: String {
         switch self {
-        case .string: return "String"
-        case .int: return "Integer"
-        case .double: return "Double"
-        case .bool: return "Boolean"
-        case .data: return "Data"
-        case .dict: return "Dictionary"
-        case .array: return "Array"
-        default: return "Unknown"
+        case .string: return NSLocalizedString("String", comment: "")
+        case .int: return NSLocalizedString("Integer", comment: "")
+        case .double: return NSLocalizedString("Double", comment: "")
+        case .bool: return NSLocalizedString("Boolean", comment: "")
+        case .data: return NSLocalizedString("Data", comment: "")
+        case .dict: return NSLocalizedString("Dictionary", comment: "")
+        case .array: return NSLocalizedString("Array", comment: "")
+        default: return NSLocalizedString("Unknown", comment: "")
         }
     }
 }

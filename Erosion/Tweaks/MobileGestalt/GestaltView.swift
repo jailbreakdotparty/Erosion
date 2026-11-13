@@ -403,14 +403,14 @@ struct GestaltView: View {
                 if autoRespring || isFromSheet {
                     mgr.shouldRespring = true
                 } else {
-                    Alertinator.shared.alert(title: "Successfully appiled MobileGestalt tweaks!", body: AppMsg.applied + (store.isEnabled([MGKey.appIntell]) ? " You'll have to reboot your device if you want to use Apple Intelligence." : ""), actionLabel: "Respring", action: { mgr.shouldRespring = true })
+                    Alertinator.shared.alert(title: "Successfully appiled MobileGestalt tweaks!", body: AppMsg.applied + (store.isEnabled([MGKey.appIntell]) ? NSLocalizedString(" You'll have to reboot your device if you want to use Apple Intelligence.", comment: "") : ""), actionLabel: "Respring", action: { mgr.shouldRespring = true })
                 }
             } else {
                 throw "overwrite failed!"
             }
         } catch {
             print("(mg) failed to apply mobilegestalt: \(error.localizedDescription)")
-            Alertinator.shared.alert(title: "Failed to apply MobileGestalt!", body: "Error: \(error.localizedDescription)")
+            Alertinator.shared.alert(title: "Failed to apply MobileGestalt!", body: String(format: NSLocalizedString("Error: %@", comment: ""), error.localizedDescription))
         }
     }
     

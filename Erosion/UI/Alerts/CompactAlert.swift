@@ -21,10 +21,10 @@ struct CompactAlert: View {
             }
             VStack(alignment: .leading) {
                 if !title.isEmpty {
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .fontWeight(.medium)
                 }
-                Text(text)
+                Text(LocalizedStringKey(text))
                     .font(!title.isEmpty ? .subheadline : .body)
             }
         }

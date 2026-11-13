@@ -58,14 +58,14 @@ struct ModifyItemPage: View {
                 case .data:
                     Text(item.stringVal)
                 case .bool:
-                    Toggle(item.boolVal.description.capitalized, isOn: $item.boolVal)
+                    Toggle(item.boolVal ? NSLocalizedString("True", comment: "") : NSLocalizedString("False", comment: ""), isOn: $item.boolVal)
                 default:
                     TextField(item.type.label, text: $item.stringVal)
                         .disabled(!isEditing)
                 }
             } header: {
                 if item.type == .dict || item.type == .array {
-                    HeaderLabel("Value (\(item.dictVal.count) items)", symbol: "character.cursor.ibeam")
+                    HeaderLabel(String(format: NSLocalizedString("Value (%lld items)", comment: ""), item.dictVal.count), symbol: "character.cursor.ibeam")
                 } else {
                     HeaderLabel("Value", symbol: "character.cursor.ibeam")
                 }

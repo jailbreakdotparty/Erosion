@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-let build = "Release"
+let build = NSLocalizedString("Release", comment: "")
 
 enum Errors {
     static var checkLogs = "Check error logs for more detailed information."
