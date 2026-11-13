@@ -15,10 +15,12 @@ public class Alertinator {
     var alertController: UIAlertController?
     
     public func alert(title: String, body: String, showCancel: Bool = true) {
+        let title = NSLocalizedString(title, comment: "")
+        let body = NSLocalizedString(body, comment: "")
         Task { @MainActor in
             alertController = UIAlertController(title: title, message: body, preferredStyle: .alert)
             if showCancel {
-                alertController?.addAction(.init(title: "OK", style: .cancel))
+                alertController?.addAction(.init(title: NSLocalizedString("OK", comment: ""), style: .cancel))
             }
             alertController?.view.tintColor = UIColor(named: "AccentColor")
             self.present(alertController!)
@@ -26,13 +28,16 @@ public class Alertinator {
     }
     
     public func alert(title: String, body: String, showCancel: Bool = true, actionLabel: String = "OK", action: @escaping () -> Void) {
+        let title = NSLocalizedString(title, comment: "")
+        let body = NSLocalizedString(body, comment: "")
+        let actionLabel = NSLocalizedString(actionLabel, comment: "")
         Task { @MainActor in
             alertController = UIAlertController(title: title, message: body, preferredStyle: .alert)
             alertController?.addAction(.init(title: actionLabel, style: .default) { _ in
                 action()
             })
             if showCancel {
-                alertController?.addAction(.init(title: "Cancel", style: .cancel))
+                alertController?.addAction(.init(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
             }
             alertController?.view.tintColor = UIColor(named: "AccentColor")
             self.present(alertController!)
@@ -40,6 +45,8 @@ public class Alertinator {
     }
     
     public func prompt(title: String, placeholder: String = "", text: String = "", showCancel: Bool = true, completion: @escaping (String?) async -> Void) {
+        let title = NSLocalizedString(title, comment: "")
+        let placeholder = NSLocalizedString(placeholder, comment: "")
         Task { @MainActor in
             alertController = UIAlertController(title: title, message: nil, preferredStyle: .alert)
             alertController?.addTextField { field in
@@ -51,13 +58,13 @@ public class Alertinator {
                 }
             }
             if showCancel {
-                alertController?.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                alertController?.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { _ in
                     Task {
                         await completion(nil)
                     }
                 })
             }
-            alertController?.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            alertController?.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default) { _ in
                 let field = self.alertController?.textFields?.first
                 Task {
                     await completion(field?.text)

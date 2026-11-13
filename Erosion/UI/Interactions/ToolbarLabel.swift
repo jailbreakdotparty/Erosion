@@ -18,10 +18,10 @@ struct ToolbarLabel: View {
     
     var body: some View {
         if #available(iOS 19.0, *) {
-            Label(label, systemImage: symbol)
+            Label(LocalizedStringKey(label), systemImage: symbol)
                 .labelStyle(.iconOnly)
         } else {
-            Text(label)
+            Text(LocalizedStringKey(label))
         }
     }
 }

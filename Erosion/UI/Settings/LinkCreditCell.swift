@@ -29,7 +29,7 @@ struct LinkCreditCell: View {
                 VStack(alignment: .leading) {
                     Text(name)
                         .fontWeight(.semibold)
-                    Text(description)
+                    Text(LocalizedStringKey(description))
                         .multilineTextAlignment(.leading)
                         .font(.subheadline)
                 }

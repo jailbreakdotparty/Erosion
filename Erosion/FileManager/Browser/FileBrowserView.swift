@@ -17,11 +17,11 @@ enum FileSortMode: String, CaseIterable, Codable, Hashable {
     
     var label: String {
         switch self {
-        case .system: return "Default"
-        case .name: return "Name"
-        case .date: return "Date"
-        case .type: return "Type"
-        case .size: return "Size"
+        case .system: return NSLocalizedString("Default", comment: "")
+        case .name: return NSLocalizedString("Name", comment: "")
+        case .date: return NSLocalizedString("Date", comment: "")
+        case .type: return NSLocalizedString("Type", comment: "")
+        case .size: return NSLocalizedString("Size", comment: "")
         }
     }
 }
