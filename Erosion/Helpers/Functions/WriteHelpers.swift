@@ -7,6 +7,16 @@
 
 import Foundation
 
+func writeFile(_ data: Data, to url: URL) -> (Bool, String) {
+    do {
+        try data.write(to: MGURL.fsGestaltURL)
+    } catch {
+        print("(mg) failed to write gestalt: \(error.localizedDescription)")
+        return (false, error.localizedDescription)
+    }
+    return (true, "succeeded")
+}
+
 func writeFileTemp(_ data: Data, to url: URL) -> (Bool, String) {
     do {
         let tempURL = url.deletingLastPathComponent().appendingPathComponent(".\(url.lastPathComponent).\(UUID().uuidString).tmp")

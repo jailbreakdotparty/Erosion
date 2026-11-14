@@ -14,6 +14,7 @@ struct GestaltView: View {
     @StateObject private var store = GestaltStore.shared
     @AppStorage("mgOverrideGates") private var mgOverrideGates = false
     @AppStorage("mgWriteAtomically") private var mgWriteAtomically = true
+    @AppStorage("mgWriteAltMethod") private var mgWriteAltMethod = false
     @AppStorage("autoRespring") var autoRespring = false
     @AppStorage("hasShownSheet") private var hasShownSheet = false
     @Environment(\.dismiss) private var dismiss
@@ -236,11 +237,9 @@ struct GestaltView: View {
                         NavigationLink {
                             List {
                                 Section {
-                                    Button("Export Current Gestalt") {
-                                        presentShareSheet(with: MGURL.fsGestaltURL)
-                                    }
-                                    Button("Export Original Gestalt") {
-                                        presentShareSheet(with: MGURL.savedGestaltURL)
+                                    Toggle("Persist after Reboot", isOn: $mgWriteAtomically)
+                                    if mgWriteAtomically {
+                                        Toggle("Alternate Method", isOn: $mgWriteAltMethod)
                                     }
                                     Button("Reset Saved Gestalt", role: .destructive) {
                                         Alertinator.shared.alert(title: "Warning!", body: MGMsg.mgResetSavWarn, action: {
@@ -253,9 +252,17 @@ struct GestaltView: View {
                                 }
                                 
                                 Section {
+                                    Button("Export Current Gestalt") {
+                                        presentShareSheet(with: MGURL.fsGestaltURL)
+                                    }
+                                    Button("Export Original Gestalt") {
+                                        presentShareSheet(with: MGURL.savedGestaltURL)
+                                    }
+                                }
+                                
+                                Section {
                                     PlainToggle("Show Hidden Tweaks", infoType: .warning, infoMessage: MGMsg.hidTweakWarn, isOn: $mgOverrideGates)
                                     Toggle("Show Custom Keys", isOn: $showCustomKeys)
-                                    Toggle("Overwrite Atomically", isOn: $mgWriteAtomically)
                                 } footer: {
                                     Text("When atomic writes are enabled, MobileGestalt will not revert after a reboot.")
                                 }

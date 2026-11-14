@@ -14,7 +14,11 @@ import UIKit
 func mgWrite(_ data: Data) -> Bool {
     var res: (Bool, String)
     if UserDefaults.standard.bool(forKey: "mgWriteAtomically") {
-        res = writeFileAtomically(data, to: MGURL.fsGestaltURL)
+        if UserDefaults.standard.bool(forKey: "mgWriteAltMethod") {
+            res = writeFileAtomically(data, to: MGURL.fsGestaltURL)
+        } else {
+            res = writeFile(data, to: MGURL.fsGestaltURL)
+        }
     } else {
         res = writeFileTemp(data, to: MGURL.fsGestaltURL)
     }
