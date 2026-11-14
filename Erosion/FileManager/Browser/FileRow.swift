@@ -162,21 +162,19 @@ struct FileRow: View {
                 Label("Get Info", systemImage: "info.circle")
             }
             
-            if file.type == .file {
-                Button {
-                    Alertinator.shared.prompt(title: "What would you like to call this file?", placeholder: file.name, completion: { result in
-                        if let name = result {
-                            let res = renameFile(file.fileURL, to: name)
-                            if res {
-                                mgr.refreshFiles.toggle()
-                            } else {
-                                Alertinator.shared.alert(title: "Failed to rename file!", body: Errors.checkLogs)
-                            }
+            Button {
+                Alertinator.shared.prompt(title: "What would you like to call this item?", placeholder: file.name, completion: { result in
+                    if let name = result {
+                        let res = renameItem(file.fileURL, to: name)
+                        if res {
+                            mgr.refreshFiles.toggle()
+                        } else {
+                            Alertinator.shared.alert(title: "Failed to rename item!", body: Errors.checkLogs)
                         }
-                    })
-                } label: {
-                    Label("Rename", systemImage: "pencil")
-                }
+                    }
+                })
+            } label: {
+                Label("Rename", systemImage: "pencil")
             }
             
             if file.type == .file {

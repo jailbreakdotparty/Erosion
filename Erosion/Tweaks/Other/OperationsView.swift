@@ -10,8 +10,7 @@ import UniformTypeIdentifiers
 
 
 struct OperationsView: View {
-    @State private var directory = ""
-    @State private var fileName = ""
+    @State private var path = ""
     @State private var isAcc = false
     @State private var showImporter = false
     
@@ -21,15 +20,13 @@ struct OperationsView: View {
     var body: some View {
         List {
             Section {
-                TextField("Directory", text: $directory)
-                    .disabled(isAcc)
-                TextField("File Name", text: $fileName)
+                TextField("Path", text: $path)
                     .disabled(isAcc)
                 HStack {
                     Button("Grant Access") {
-                        let res = wq.grantAccess(path: "\(directory)/\(fileName)")
+                        let res = wq.grantAccess(path: path)
                         if !res.0 {
-                            Alertinator.shared.alert(title: "Failed to get access to target file!", body: "\(res.1): \(res.2)")
+                            Alertinator.shared.alert(title: "Failed to get access to \(path)!", body: "\(res.1): \(res.2)")
                         } else {
                             isAcc = true
                         }
@@ -52,8 +49,7 @@ struct OperationsView: View {
                     }
                     
                     Button("Export File") {
-                        let fileDir = "\(directory)/\(fileName)"
-                        presentShareSheet(with: URL(fileURLWithPath: fileDir))
+                        presentShareSheet(with: URL(fileURLWithPath: path))
                     }
                 }
             } header: {
@@ -76,7 +72,7 @@ struct OperationsView: View {
                 
                 Button("Overwrite File") {
                     do {
-                        let targetURL = URL(fileURLWithPath: "\(directory)/\(fileName)")
+                        let targetURL = URL(fileURLWithPath: path)
                         try imprtData.write(to: targetURL)
                         print("(ov) successfully overwrote file: \(targetURL.path) (\(imprtData.count))")
                         Haptic.shared.play(.soft)
@@ -89,7 +85,7 @@ struct OperationsView: View {
                 
                 Button("Move File") {
                     do {
-                        let targetURL = URL(fileURLWithPath: "\(directory)").appendingPathComponent(imprtName)
+                        let targetURL = URL(fileURLWithPath: path)
                         try imprtData.write(to: targetURL)
                         print("(ov) successfully moved file: \(imprtName) -> \(targetURL.path)")
                         Haptic.shared.play(.soft)
@@ -102,7 +98,7 @@ struct OperationsView: View {
                 
                 Button("Delete File", role: .destructive) {
                     do {
-                        let targetURL = URL(fileURLWithPath: "\(directory)/\(fileName)")
+                        let targetURL = URL(fileURLWithPath: path)
                         try fm.removeItem(at: targetURL)
                         print("(ov) successfully deleted file: \(targetURL.path)")
                         Haptic.shared.play(.heavy)

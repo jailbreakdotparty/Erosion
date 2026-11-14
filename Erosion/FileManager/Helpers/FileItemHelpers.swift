@@ -100,12 +100,3 @@ enum FileType: String {
         }
     }
 }
-
-private func getContainerFiles(at url: URL) -> [FileItem] {
-    var files: [FileItem] = []
-    let paths = fsHandlers.getDirPaths(url.path)
-    for path in paths {
-        files.append(getFileItem(at: URL(fileURLWithPath: path)))
-    }
-    return files
-}

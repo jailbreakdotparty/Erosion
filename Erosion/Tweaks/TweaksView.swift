@@ -20,7 +20,7 @@ struct TweaksView: View {
                 }
                 
                 Section {
-                    if raveSupported() || weOnADebugBuild {
+                    if raveSupported() || AppInfo.isDebug {
                         NavigationLink("MobileGestalt", destination: GestaltView())
                     }
                     NavigationLink("Config Tweaks", destination: ConfigView())

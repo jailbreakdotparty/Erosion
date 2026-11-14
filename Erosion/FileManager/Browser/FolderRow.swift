@@ -69,6 +69,21 @@ struct FolderRow: View {
                 }
                 
                 Button {
+                    Alertinator.shared.prompt(title: "What would you like to call this item?", placeholder: file.name, completion: { result in
+                        if let name = result {
+                            let res = renameItem(file.fileURL, to: name)
+                            if res {
+                                mgr.refreshFiles.toggle()
+                            } else {
+                                Alertinator.shared.alert(title: "Failed to rename item!", body: Errors.checkLogs)
+                            }
+                        }
+                    })
+                } label: {
+                    Label("Rename", systemImage: "pencil")
+                }
+                
+                Button {
                     let res = zipFile(file.fileURL)
                     if res {
                         mgr.refreshFiles.toggle()

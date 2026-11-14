@@ -11,7 +11,6 @@ import UniformTypeIdentifiers
 
 let device = UIDevice.current
 let fm = FileManager.default
-var weOnADebugBuild = false
 var pipe = Pipe()
 var sema = DispatchSemaphore(value: 0)
 
@@ -28,12 +27,6 @@ struct ErosionApp: App {
         let fixMethod = class_getInstanceMethod(UIDocumentPickerViewController.self, #selector(UIDocumentPickerViewController.fix_init(forOpeningContentTypes:asCopy:)))!
         let origMethod = class_getInstanceMethod(UIDocumentPickerViewController.self, #selector(UIDocumentPickerViewController.init(forOpeningContentTypes:asCopy:)))!
         method_exchangeImplementations(origMethod, fixMethod)
-        
-        #if DEBUG
-        weOnADebugBuild = true
-        #else
-        weOnADebugBuild = false
-        #endif
     }
     
     var body: some Scene {
@@ -77,11 +70,11 @@ struct ErosionApp: App {
                 print("")
                 print("[*] Erosion v\(AppInfo.appVersion) (\(build))")
                 print("[*] Running on \(UIDevice.current.systemName) \(UIDevice.current.systemVersion), \(machineName())")
-                if !isSupported() && !weOnADebugBuild {
+                if !isSupported() && !AppInfo.isDebug {
                     Alertinator.shared.alert(title: "Your \(device.systemName) version is not supported!", body: AppMsg.unsupported, showCancel: false, actionLabel: "Exit", action: { exitinator() })
                 }
                 group = wq.getAppGroup()
-                if group == "group.com.jbdotparty.Erosion.WQ" && !weOnADebugBuild {
+                if group == "group.com.jbdotparty.Erosion.WQ" && !AppInfo.isDebug {
                     // Idiot checker - Skadz 2026-11-09
                     Alertinator.shared.alert(title: "Using default App Group!", body: "Erosion was unable to detect its App Group ID and will be using a default value. The exploit will likely fail and tweaks will not work. If you are using LiveContainer or a paid/enterprise certificate, that is likely causing this issue. It is recommended to install Erosion using your own Apple ID and a reliable tool of choice. Please do not ask for support if things are not working.", showCancel: false, actionLabel: "I understand and will not complain.", action: {})
                 }

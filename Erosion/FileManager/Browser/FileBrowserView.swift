@@ -74,7 +74,7 @@ struct FileBrowserView: View {
             } else {
                 ForEach(dirFiles) { file in
                     if file.type == .folder {
-                        FolderRow(file: file, shouldGrant: isContainer ? true : false, isContainer: isContainer)
+                        FolderRow(file: file, shouldGrant: shouldGrant || isContainer, isContainer: isContainer)
                     } else {
                         FileRow(file: file)
                     }
@@ -307,7 +307,7 @@ struct FileBrowserView: View {
             do {
                 var unsortedFiles: [FileItem] = []
                 if isContainer {
-                    let paths = fsHandlers.getDirPaths(path.path)
+                    let paths = fsHandlers.getDirPaths(path.path, maxInode: maxInode)
                     for path in paths {
                         unsortedFiles.append(getFileItem(at: URL(fileURLWithPath: path), isContainer: true))
                     }

@@ -79,15 +79,13 @@ func generateNavPath(path: String) -> String {
     return ""
 }
 
-func renameFile(_ url: URL, to newName: String) -> Bool {
+func renameItem(_ url: URL, to newName: String) -> Bool {
     do {
-        let data = try Data(contentsOf: url)
-        try fm.removeItem(at: url)
         let targetURL = url.deletingLastPathComponent().appendingPathComponent(newName)
-        try data.write(to: targetURL)
+        try fm.moveItem(at: url, to: targetURL)
         return true
     } catch {
-        print("(fm) failed to rename file: \(error.localizedDescription)")
+        print("(fm) failed to rename item: \(error.localizedDescription)")
     }
     return false
 }
