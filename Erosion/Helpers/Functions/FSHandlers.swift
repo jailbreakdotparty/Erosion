@@ -49,12 +49,12 @@ class FSHandlers {
         return paths
     }
     
-    func getContainerPath(at containerURL: URL = FSURL.appContainers, forMatch match: String, hashOnly: Bool = false) -> String {
-        let containers = getDirPaths(containerURL.path, maxInode: 10000)
+    func getContainerPath(_ containers: [String], forMatch match: String, hashOnly: Bool = false) -> String? {
         for path in containers {
             let url = URL(fileURLWithPath: path)
             if let appName = getBIDFromXattr(url) {
                 if appName == match {
+                    print("(fs) got match for \(match): \(url.path)")
                     if hashOnly {
                         return url.lastPathComponent
                     }
@@ -63,7 +63,7 @@ class FSHandlers {
             }
         }
         print("(fs) failed to get container for \(match)!")
-        return ""
+        return nil
     }
     
     func openInFilesApp(_ fileURL: URL) {

@@ -22,8 +22,13 @@ enum PBMsg {
 }
 
 struct PosterBoardView: View {
-    @AppStorage("pbContainerPath") private var pbContainerPath = ""
-    @State private var isReady = false
+    @AppStorage("pbContainerHash") private var pbContainerHash = ""
+    private var pbContainerPath = {
+        if let pbContainerHash = UserDefaults.standard.value(forKey: "pbContainerHash") as? String {
+            return "/var/mobile/Containers/Data/Application/\(pbContainerHash)"
+        }
+        return ""
+    }()
     @AppStorage("tendiesArray") private var tendiesArray: [TendiesObject] = []
     @AppStorage("hasShownFirstRunMsg") private var hasShownFirstRunMsg = false
     
@@ -32,104 +37,94 @@ struct PosterBoardView: View {
     
     var body: some View {
         Group {
-            if !isReady {
-                VStack(spacing: 8) {
-                    ProgressView()
-                        .scaleEffect(1.25)
-                    Text("Getting Container Path...")
-                        .foregroundStyle(.secondary)
+            ScrollView {
+                if tendiesArray.isEmpty {
+                    Button {
+                        showImporter = true
+                    } label: {
+                        VStack(alignment: .leading) {
+                            CompactAlert(title: "No tendies imported!", symbol: "exclamationmark.triangle.fill", text: PBMsg.noTendies)
+                                .padding(.horizontal, 15)
+                        }
+                        .frame(alignment: .leading)
+                        .multilineTextAlignment(.leading)
+                    }
                 }
-                .frame(maxWidth: .infinity)
-            } else {
-                ScrollView {
-                    if tendiesArray.isEmpty {
+                LazyVGrid(columns: columns) {
+                    ForEach($tendiesArray) { $tendies in
                         Button {
-                            showImporter = true
+                            if !tendies.isOn && tendiesArray.filter({ $0.isOn }).flatMap({ $0.descrNames }).count > 15 {
+                                Alertinator.shared.alert(title: "Max wallpaper limit reached!", body: PBMsg.tooManyTendies)
+                            } else {
+                                tendies.isOn.toggle()
+                            }
                         } label: {
-                            VStack(alignment: .leading) {
-                                CompactAlert(title: "No tendies imported!", symbol: "exclamationmark.triangle.fill", text: PBMsg.noTendies)
-                                    .padding(.horizontal, 15)
-                            }
-                            .frame(alignment: .leading)
-                            .multilineTextAlignment(.leading)
-                        }
-                    }
-                    LazyVGrid(columns: columns) {
-                        ForEach($tendiesArray) { $tendies in
-                            Button {
-                                if !tendies.isOn && tendiesArray.filter({ $0.isOn }).flatMap({ $0.descrNames }).count > 15 {
-                                    Alertinator.shared.alert(title: "Max wallpaper limit reached!", body: PBMsg.tooManyTendies)
-                                } else {
-                                    tendies.isOn.toggle()
+                            VStack(spacing: 8) {
+                                Image(systemName: tendies.targetDescr == .photos ? "play.rectangle" : "photo")
+                                    .imageScale(.large)
+                                    .foregroundStyle(Color.accentColor)
+                                VStack {
+                                    Text(tendies.name)
+                                        .lineLimit(1)
+                                        .fontWeight(.medium)
+                                    Text("\(tendies.descrNames.count) wallpaper" + (tendies.descrNames.count == 1 ? "" : "s"))
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
                                 }
-                            } label: {
-                                VStack(spacing: 8) {
-                                    Image(systemName: tendies.targetDescr == .photos ? "play.rectangle" : "photo")
-                                        .imageScale(.large)
-                                        .foregroundStyle(Color.accentColor)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding()
+                            .padding(.vertical, 10)
+                            .background {
+                                if tendies.targetDescr == .mercury {
                                     VStack {
-                                        Text(tendies.name)
-                                            .lineLimit(1)
-                                            .fontWeight(.medium)
-                                        Text("\(tendies.descrNames.count) wallpaper" + (tendies.descrNames.count == 1 ? "" : "s"))
+                                        Text("M")
                                             .font(.footnote)
-                                            .foregroundStyle(.secondary)
+                                            .padding(6)
+                                            .background(Color.accentColor)
+                                            .clipShape(.circle)
+                                        Spacer()
                                     }
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                                    .frame(maxHeight: .infinity)
+                                    .padding(12)
                                 }
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .padding()
-                                .padding(.vertical, 10)
-                                .background {
-                                    if tendies.targetDescr == .mercury {
-                                        VStack {
-                                            Text("M")
-                                                .font(.footnote)
-                                                .padding(6)
-                                                .background(Color.accentColor)
-                                                .clipShape(.circle)
-                                            Spacer()
+                            }
+                            .background {
+                                RoundedRectangle(cornerRadius: 26)
+                                    .fill(Color(.secondarySystemBackground))
+                                    .overlay {
+                                        if tendies.isOn {
+                                            RoundedRectangle(cornerRadius: 26)
+                                                .fill(Color.clear)
+                                                .strokeBorder(lineWidth: 2)
+                                                .foregroundStyle(Color.accentColor)
                                         }
-                                        .frame(maxWidth: .infinity, alignment: .trailing)
-                                        .frame(maxHeight: .infinity)
-                                        .padding(12)
                                     }
+                            }
+                            .contextMenu {
+                                Button {
+                                    let url = AppURL.pbFolders.appendingPathComponent(tendies.folderName)
+                                    fsHandlers.openInFilesApp(url)
+                                } label: {
+                                    Label("Show Data Folder", systemImage: "folder")
                                 }
-                                .background {
-                                    RoundedRectangle(cornerRadius: 26)
-                                        .fill(Color(.secondarySystemBackground))
-                                        .overlay {
-                                            if tendies.isOn {
-                                                RoundedRectangle(cornerRadius: 26)
-                                                    .fill(Color.clear)
-                                                    .strokeBorder(lineWidth: 2)
-                                                    .foregroundStyle(Color.accentColor)
-                                            }
-                                        }
-                                }
-                                .contextMenu {
-                                    Button {
+                                
+                                Button(role: .destructive) {
+                                    withAnimation {
                                         let url = AppURL.pbFolders.appendingPathComponent(tendies.folderName)
-                                        fsHandlers.openInFilesApp(url)
-                                    } label: {
-                                        Label("Show Data Folder", systemImage: "folder")
+                                        try? fm.removeItem(at: url)
+                                        tendiesArray.removeAll { $0.id == tendies.id }
                                     }
-                                    
-                                    Button(role: .destructive) {
-                                        withAnimation {
-                                            let url = AppURL.pbFolders.appendingPathComponent(tendies.folderName)
-                                            try? fm.removeItem(at: url)
-                                            tendiesArray.removeAll { $0.id == tendies.id }
-                                        }
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
                                 }
                             }
                         }
                     }
-                    .padding(.horizontal, 15)
-                    .foregroundStyle(Color(.label))
                 }
+                .padding(.horizontal, 15)
+                .foregroundStyle(Color(.label))
             }
         }
         .navigationTitle("Wallpapers")
@@ -140,83 +135,41 @@ struct PosterBoardView: View {
             }
         }
         .safeAreaInset(edge: .bottom) {
-            if isReady {
-                VStack {
-                    Button {
-                        showImporter = true
-                    } label: {
-                        ButtonLabel("Import .tendies", symbol: "arrow.down.doc")
-                    }
+            VStack {
+                Button {
+                    showImporter = true
+                } label: {
+                    ButtonLabel("Import .tendies", symbol: "arrow.down.doc")
                 }
-                .buttonStyle(ActionButtonStyle())
-                .frame(maxWidth: .infinity)
-                .padding(device.userInterfaceIdiom == .pad ? 0 : 15)
             }
+            .buttonStyle(ActionButtonStyle())
+            .frame(maxWidth: .infinity)
+            .padding(device.userInterfaceIdiom == .pad ? 0 : 15)
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button {
-                        showImporter = true
+                        for object in tendiesArray {
+                            let url = AppURL.pbFolders.appendingPathComponent(object.folderName)
+                            try? fm.removeItem(at: url)
+                        }
+                        tendiesArray.removeAll()
                     } label: {
-                        Label("Import .tendies", systemImage: "arrow.down.doc")
+                        Label("Clear Imports", systemImage: "xmark")
                     }
-                    .disabled(!isReady)
-                    
+                    Button(role: .destructive) {
+                        let _ = resetWallpapers(for: PBPath.wpKit)
+                        let _ = resetWallpapers(for: PBPath.mercury)
+                        let _ = resetWallpapers(for: PBPath.photos)
+                    } label: {
+                        Label("Reset Wallpapers", systemImage: "trash")
+                    }
+                    Divider()
                     Button {
                         openApp(withBID: SysBID.poster)
                     } label: {
                         Label("Open PosterBoard", systemImage: "arrow.up.right.square")
-                    }
-                    
-                    Divider()
-                    
-                    NavigationLink {
-                        List {
-                            Section {
-                                TextField("PosterBoard Path", text: $pbContainerPath, axis: .vertical)
-                                Button("Fetch Path") {
-                                    pbContainerPath = fsHandlers.getContainerPath(forMatch: "com.apple.PosterBoard")
-                                }
-                            } header: {
-                                HeaderLabel("PosterBoard", symbol: "photo")
-                            }
-                            
-                            Section {
-                                Button("Clear Imports") {
-                                    for object in tendiesArray {
-                                        let url = AppURL.pbFolders.appendingPathComponent(object.folderName)
-                                        try? fm.removeItem(at: url)
-                                    }
-                                    tendiesArray.removeAll()
-                                }
-                                Button("Reset Collections", role: .destructive) {
-                                    let res = resetWallpapers(for: PBPath.wpKit)
-                                    if res {
-                                        Haptic.shared.play(.soft)
-                                    }
-                                }
-                                Button("Reset MercuryPoster", role: .destructive) {
-                                    let res = resetWallpapers(for: PBPath.mercury)
-                                    if res {
-                                        Haptic.shared.play(.soft)
-                                    }
-                                }
-                                Button("Reset Videos", role: .destructive) {
-                                    let res = resetWallpapers(for: PBPath.photos)
-                                    if res {
-                                        Haptic.shared.play(.soft)
-                                    }
-                                }
-                            } header: {
-                                HeaderLabel("Data", symbol: "loupe")
-                            } footer: {
-                                Text("If you're having trouble applying custom wallpapers, try resetting any of the three extensions listed.")
-                            }
-                        }
-                        .navigationTitle("PosterBoard Settings")
-                    } label: {
-                        Label("Settings", systemImage: "gearshape")
                     }
                 } label: {
                     Image(systemName: "ellipsis")
@@ -254,7 +207,7 @@ struct PosterBoardView: View {
                     }
                 }
                 .disabled(tendiesArray.filter({ $0.isOn }).isEmpty)
-                .disabled(pbContainerPath.isEmpty || !fm.fileExists(atPath: AppURL.pb.path))
+                .disabled(!fm.fileExists(atPath: AppURL.pb.path))
             }
         }
         .fileImporter(isPresented: $showImporter, allowedContentTypes: [.item]) { result in
@@ -266,9 +219,6 @@ struct PosterBoardView: View {
     }
     
     private func doSetupStuff() {
-        if pbContainerPath.isEmpty {
-            pbContainerPath = fsHandlers.getContainerPath(forMatch: "com.apple.PosterBoard")
-        }
         if !fm.fileExists(atPath: AppURL.pb.path) {
             do {
                 try fm.createDirIfNeeded(at: AppURL.pb)
@@ -277,7 +227,6 @@ struct PosterBoardView: View {
                 Alertinator.shared.alert(title: "Failed to setup PosterBoard tweaks!", body: AppMsg.opFailed)
             }
         }
-        isReady = true
     }
     
     private func applyObjects(_ objects: [TendiesObject]) -> (Bool, String) {

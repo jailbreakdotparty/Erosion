@@ -9,12 +9,15 @@ import SwiftUI
 
 
 struct TweaksView: View {
+    @AppStorage("pbContainerHash") private var pbContainerHash = ""
+    @AppStorage("mpContainerHash") private var mpContainerHash = ""
+    
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    NavigationLink("Custom Wallpapers", destination: PosterBoardView())
-                    NavigationLink("Dialer Themer", destination: KeypadView())
+                    NavigationLink("Custom Wallpapers", destination: PosterBoardView()).disabled(pbContainerHash.isEmpty)
+                    NavigationLink("Dialer Themer", destination: KeypadView()).disabled(mpContainerHash.isEmpty)
                 } header: {
                     HeaderLabel("Theming", symbol: "paintbrush")
                 }

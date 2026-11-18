@@ -97,8 +97,11 @@ final class KeypadManager: ObservableObject {
     @Published var mpKeypad = [KeypadItem]()
     
     private var mpContainerPath = {
-        return UserDefaults.standard.value(forKey: "mpContainerPath") as? String ?? ""
-    }
+        if let mpContainerHash = UserDefaults.standard.value(forKey: "mpContainerHash") as? String {
+            return "/var/mobile/Containers/Data/Application/\(mpContainerHash)"
+        }
+        return ""
+    }()
     
     init() {
         if mpKeypad.isEmpty {
@@ -108,7 +111,7 @@ final class KeypadManager: ObservableObject {
     
     // fun...
     func getFileRegCode() -> String {
-        let tpURL = URL(fileURLWithPath: mpContainerPath()).appendingPathComponent("Library/Caches/TelephonyUI-10")
+        let tpURL = URL(fileURLWithPath: mpContainerPath).appendingPathComponent("Library/Caches/TelephonyUI-10")
         if let tpURLs = try? fm.contentsOfDirectory(at: tpURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles) {
             if let split = tpURLs.first?.lastPathComponent.split(separator: "-") {
                 return split.map { String($0) }[0]
@@ -131,7 +134,7 @@ final class KeypadManager: ObservableObject {
         for item in mpKeypad {
             let files = item.kpID.fileNames
             for fileName in files {
-                let finalURL = URL(fileURLWithPath: mpContainerPath()).appendingPathComponent("Library/Caches/TelephonyUI-10").appendingPathComponent(fileName)
+                let finalURL = URL(fileURLWithPath: mpContainerPath).appendingPathComponent("Library/Caches/TelephonyUI-10").appendingPathComponent(fileName)
                 do {
                     try item.imgData.write(to: finalURL)
                 } catch {
@@ -148,7 +151,7 @@ final class KeypadManager: ObservableObject {
     
     func resetKeypadItems() -> Bool {
         do {
-            let filesURL = URL(fileURLWithPath: mpContainerPath()).appendingPathComponent("Library/Caches/TelephonyUI-10")
+            let filesURL = URL(fileURLWithPath: mpContainerPath).appendingPathComponent("Library/Caches/TelephonyUI-10")
             let files = try fm.contentsOfDirectory(at: filesURL, includingPropertiesForKeys: [])
             for fileURL in files {
                 try fm.removeItem(at: fileURL)
@@ -186,7 +189,7 @@ final class KeypadManager: ObservableObject {
     
     func getCurrentKeypads(size: KPSize = KPSize.defSize, custW: Int = 0, custH: Int = 0, saveOgData: Bool = false) {
         do {
-            let filesURL = URL(fileURLWithPath: mpContainerPath()).appendingPathComponent("Library/Caches/TelephonyUI-10")
+            let filesURL = URL(fileURLWithPath: mpContainerPath).appendingPathComponent("Library/Caches/TelephonyUI-10")
             for kpId in KeypadID.allCases {
                 let fileName = kpId.getAccentedFileName()
                 let url = filesURL.appendingPathComponent(fileName)

@@ -31,22 +31,46 @@ struct ErosionApp: App {
     
     var body: some Scene {
         WindowGroup {
-            TabView {
-                ContentView()
-                    .tabItem {
-                        Label("Home", systemImage: "house")
+            Group {
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    NavigationSplitView {
+                        ContentView()
+                            .scrollContentBackground(.hidden)
+                            .background(Color(.secondarySystemBackground).opacity(0.1))
+                    } detail: {
+                        TabView {
+                            TweaksView()
+                                .tabItem {
+                                    Label("Tweaks", systemImage: "wrench.and.screwdriver")
+                                }
+                                .id(0)
+                            FMRootView()
+                                .tabItem {
+                                    Label("File Browser", systemImage: "folder")
+                                }
+                                .id(1)
+                        }
+                        .toolbar(.hidden, for: .navigationBar)
                     }
-                    .id(0)
-                TweaksView()
-                    .tabItem {
-                        Label("Tweaks", systemImage: "wrench.and.screwdriver")
+                } else {
+                    TabView {
+                        ContentView()
+                            .tabItem {
+                                Label("Home", systemImage: "house")
+                            }
+                            .id(0)
+                        TweaksView()
+                            .tabItem {
+                                Label("Tweaks", systemImage: "wrench.and.screwdriver")
+                            }
+                            .id(1)
+                        FMRootView()
+                            .tabItem {
+                                Label("File Browser", systemImage: "folder")
+                            }
+                            .id(2)
                     }
-                    .id(1)
-                FMRootView()
-                    .tabItem {
-                        Label("File Browser", systemImage: "folder")
-                    }
-                    .id(2)
+                }
             }
             .environmentObject(mgr)
             .onAppear {
