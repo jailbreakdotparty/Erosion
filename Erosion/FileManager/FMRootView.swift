@@ -23,6 +23,8 @@ enum FSURL {
 }
 
 struct FMRootView: View {
+    @State private var showSettingsSheet = false
+    
     var body: some View {
         NavigationStack {
             List {
@@ -43,6 +45,18 @@ struct FMRootView: View {
                 }
             }
             .navigationTitle("File Browser")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showSettingsSheet = true
+                    } label: {
+                        Label("Settings", systemImage: "gear").labelStyle(.iconOnly)
+                    }
+                }
+            }
+            .sheet(isPresented: $showSettingsSheet) {
+                FMSettings()
+            }
         }
     }
 }

@@ -8,8 +8,8 @@
 import Foundation
 import UniformTypeIdentifiers
 
-struct FileItem: Identifiable {
-    let id = UUID()
+struct FileItem: Identifiable, Codable {
+    var id = UUID()
     var name: String
     var fileURL: URL
     var destURL: URL
@@ -32,13 +32,11 @@ struct FileItem: Identifiable {
 
 let clearFileItem = FileItem(name: "", fileURL: URL(fileURLWithPath: ""), destURL: URL(fileURLWithPath: ""), type: .file, uttype: .data, size: 0, creationDate: Date(), modifiedDate: Date(), creationDateStr: "", modifiedDateStr: "", hidden: false, posixPerms: "", owner: "", group: "", readable: false, writable: false, executable: false)
 
-func getFileItem(at url: URL, isContainer: Bool = false) -> FileItem {
+func getFileItem(at url: URL) -> FileItem {
     var item = FileItem(name: url.lastPathComponent, fileURL: url, destURL: url, type: .file, uttype: .data, size: 0, creationDate: Date(), modifiedDate: Date(), creationDateStr: "", modifiedDateStr: "", hidden: false, posixPerms: "", owner: "", group: "", readable: false, writable: false, executable: false)
     
-    if isContainer {
-        if let folderName = getBIDFromXattr(url) {
-            item.name = folderName
-        }
+    if let name = getBIDFromXattr(item.fileURL) {
+        item.name = name
     }
     
     let formatter = DateFormatter()
@@ -89,7 +87,7 @@ func getFileItem(at url: URL, isContainer: Bool = false) -> FileItem {
     return item
 }
 
-enum FileType: String {
+enum FileType: String, Codable {
     case file, folder, symlink
     
     var sortOrder: Int {

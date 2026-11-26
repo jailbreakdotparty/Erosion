@@ -26,6 +26,28 @@ enum FileSortMode: String, CaseIterable, Codable, Hashable {
     }
 }
 
+enum FileBrowserState {
+    case loading, loaded, noPerms, noFiles, unknownError
+    
+    var description: String {
+        switch self {
+        case .noFiles: return "This directory is empty."
+        case .noPerms: return "You don't have permission to view the files in this directory."
+        case .unknownError: return "Unknown error."
+        default: return ""
+        }
+    }
+    
+    var symbol: String {
+        switch self {
+        case .noFiles: return "questionmark.folder"
+        case .noPerms: return "externaldrive.badge.xmark"
+        case .unknownError: return "exclamationmark.triangle"
+        default: return ""
+        }
+    }
+}
+
 struct FileBrowserView: View {
     @EnvironmentObject var mgr: ErosionManager
     var path: URL = URL(fileURLWithPath: "/")
@@ -42,43 +64,51 @@ struct FileBrowserView: View {
     @AppStorage("hideDates") var hideDates = false
     @AppStorage("textViewerSize") var textViewerSize = 10
     @AppStorage("useMonospaced") var useMonospaced = true
+    @AppStorage("autoRefresh") var autoRefresh = true
     
     @State private var showFileImporter = false
-    @State private var showFailure = false
-    @State private var failMsg = ""
-    @State private var isLoading = false
-    @State private var hasLoaded = false
+    @State private var currentState = FileBrowserState.loading
+    @State private var localizedError = ""
+    @State private var isLoadingInBackground = false
+    @State private var showSettingsSheet = false
     
     var body: some View {
-        List {
-            if isLoading {
-                Section {
-                    VStack(alignment: .leading) {
-                        HStack {
-                            ProgressView()
-                                .offset(y: 0.5)
-                            Text("Loading Files...")
-                                .fontWeight(.medium)
-                        }
-                        if isContainer {
-                            Text("These files could take 30 seconds or longer to load, since the method of getting container paths is very slow.")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
+        Group {
+            if currentState == .loading {
+                VStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(1.25)
+                    Text("Loading Files...")
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+            } else if currentState == .loaded {
+                List {
+                    ForEach(dirFiles) { file in
+                        if file.type == .folder {
+                            FolderRow(file: file, shouldGrant: shouldGrant || isContainer, isContainer: isContainer)
+                        } else {
+                            FileRow(file: file)
                         }
                     }
                 }
-            } else if showFailure {
-                CompactAlert(title: "Failed to load files from directory!", symbol: "folder.badge.questionmark", text: failMsg)
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
             } else {
-                ForEach(dirFiles) { file in
-                    if file.type == .folder {
-                        FolderRow(file: file, shouldGrant: shouldGrant || isContainer, isContainer: isContainer)
+                VStack(spacing: 8) {
+                    Image(systemName: currentState.symbol)
+                        .font(.largeTitle)
+                    if currentState == .noFiles {
+                        Text(currentState.description)
                     } else {
-                        FileRow(file: file)
+                        VStack {
+                            Text("Failed to load files from path!")
+                            Text(currentState == .unknownError ? localizedError : currentState.description)
+                                .multilineTextAlignment(.center)
+                                .foregroundStyle(.secondary)
+                                .font(.footnote)
+                        }
                     }
                 }
+                .frame(maxWidth: .infinity)
             }
         }
         .navigationTitle(path.lastPathComponent)
@@ -87,6 +117,11 @@ struct FileBrowserView: View {
         .adaptiveListMargin()
         .searchable(text: $searchText)
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if isLoadingInBackground {
+                    ProgressView()
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     ForEach(FileSortMode.allCases, id: \.self) { option in
@@ -208,47 +243,10 @@ struct FileBrowserView: View {
                     } label: {
                         Label("Open App Docs", systemImage: "folder")
                     }
-                    NavigationLink {
-                        List {
-                            Section {
-                                HStack {
-                                    Text("Max Inode")
-                                    TextField("7500000", value: $maxInode, format: .number)
-                                        .multilineTextAlignment(.trailing)
-                                }
-                            } header: {
-                                HeaderLabel("Container Fetching", symbol: "externaldrive")
-                            } footer: {
-                                Text("This controls how quickly files can load. Lower values = faster fetching but less files.")
-                            }
-                            
-                            Section {
-                                Picker("List Style", selection: $listStyle) {
-                                    Text("Default").tag(1)
-                                    Text("Plain").tag(2)
-                                    Text("Grouped").tag(3)
-                                }
-                                Toggle("Hide Dates", isOn: $hideDates)
-                            } header: {
-                                HeaderLabel("View Options", symbol: "eye")
-                            }
-                            
-                            Section {
-                                Stepper(value: $textViewerSize) {
-                                    HStack {
-                                        Text("Text Size")
-                                        Spacer()
-                                        Text(textViewerSize.description)
-                                    }
-                                }
-                                Toggle("Monospaced Font", isOn: $useMonospaced)
-                            } header: {
-                                HeaderLabel("Text Viewer", symbol: "doc.plaintext")
-                            }
-                        }
-                        .navigationTitle("File Browser Settings")
+                    Button {
+                        showSettingsSheet = true
                     } label: {
-                        Label("Settings", systemImage: "gearshape")
+                        Label("Settings", systemImage: "gear")
                     }
                 } label: {
                     Label("Actions", systemImage: "ellipsis")
@@ -266,16 +264,13 @@ struct FileBrowserView: View {
             if !mgr.storedFiles.isEmpty && mgr.storedURL == path {
                 dirFiles = sortFiles(files: mgr.storedFiles)
                 unfilteredFiles = sortFiles(files: mgr.storedFiles)
-            } else if isContainer && hasLoaded {
-                // do nothing as it's already being stored in the variable
             } else {
                 if shouldGrant {
                     let res = wq.grantAccess(path: path.path)
                     if res.0 {
                         loadFilesFromPath()
                     } else {
-                        showFailure = true
-                        failMsg = "You don't have permission to view this directory."
+                        currentState = .noPerms
                     }
                 } else {
                     loadFilesFromPath()
@@ -298,15 +293,111 @@ struct FileBrowserView: View {
         .onChange(of: mgr.refreshFiles) {
             loadFilesFromPath()
         }
+        .sheet(isPresented: $showSettingsSheet) {
+            FMSettings()
+        }
     }
     
     // MARK: handle files
+    /*
+     refactor and caching idea is basically just this:
+     - any file/folder that doesn't need pathleak: no caching needed! just grant access.
+     - container domains that need pathleak:
+        - if it's not already been loaded or saved, it will load the files and save them into appstorage.
+        - if something has been saved, it will present those containers and then load new ones. it will then append whatever hasn't been added to the array (filter out based on path) and fetch new label names, and the new array it loaded will be saved to appstorage.
+        - appstorage variable: savedFiles_path :thumbs_up:
+     */
+    
+    private func loadFilesFromPath() {
+        if isContainer {
+            loadFilesForContainer()
+        } else {
+            loadFiles()
+        }
+    }
+    
+    private func loadFiles() {
+        currentState = .loading
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                var unsortedFiles: [FileItem] = []
+                let pathFiles = try fm.contentsOfDirectory(at: path, includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey, .fileSizeKey, .contentModificationDateKey])
+                
+                unsortedFiles = pathFiles.map { fileURL in
+                    return getFileItem(at: fileURL)
+                }
+                dirFiles = sortFiles(files: unsortedFiles)
+                unfilteredFiles = sortFiles(files: unsortedFiles)
+                if dirFiles.isEmpty {
+                    currentState = .noFiles
+                } else {
+                    currentState = .loaded
+                }
+            } catch {
+                let nserror = error as NSError
+                print("[!] failed to load files from \(path.path): \(nserror.localizedDescription) (code \(nserror.code))")
+                if nserror.code == NSFileReadNoPermissionError {
+                    currentState = .noPerms
+                } else {
+                    localizedError = nserror.localizedDescription
+                    currentState = .unknownError
+                }
+            }
+        }
+    }
+    
+    private func loadFilesForContainer() {
+        currentState = .loading
+        DispatchQueue.global(qos: .userInitiated).async {
+            // load what's already been saved for container files (if it exists)
+            if let saved = UserDefaults.standard.codable([FileItem].self, forKey: "savedFiles_\(path.path)") {
+                dirFiles = sortFiles(files: saved)
+                unfilteredFiles = sortFiles(files: saved)
+                currentState = .loaded
+                if !autoRefresh { return }
+                isLoadingInBackground = true
+            }
+            // then fetch with pathleak
+            var unsortedFiles: [FileItem] = []
+            let paths = fsHandlers.getDirPaths(path.path, maxInode: maxInode)
+            for path in paths {
+                unsortedFiles.append(getFileItem(at: URL(fileURLWithPath: path)))
+            }
+            UserDefaults.standard.setCodable(unsortedFiles, forKey: "savedFiles_\(path.path)")
+            // if it's empty then write what's already been changed to the ui, else just update the files already showing up in the ui
+            if dirFiles.isEmpty {
+                dirFiles = sortFiles(files: unsortedFiles)
+                unfilteredFiles = sortFiles(files: unsortedFiles)
+            } else {
+                // remove the files that no longer exist in the unsortedFiles array
+                let unsortedFileURLs = unsortedFiles.map { $0.fileURL }
+                dirFiles.removeAll { !unsortedFileURLs.contains($0.fileURL) }
+                unsortedFiles.removeAll { !unsortedFileURLs.contains($0.fileURL) }
+                // add any files that do suddenly exist
+                let existingFileURLs = dirFiles.map { $0.fileURL }
+                let newFiles = unsortedFiles.filter( { !existingFileURLs.contains($0.fileURL) })
+                dirFiles = sortFiles(files: dirFiles + newFiles)
+                unsortedFiles = sortFiles(files: dirFiles + newFiles)
+            }
+            if dirFiles.isEmpty {
+                currentState = .noFiles
+            } else {
+                currentState = .loaded
+            }
+            isLoadingInBackground = false
+        }
+    }
+    
+    /*
     private func loadFilesFromPath() {
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 var unsortedFiles: [FileItem] = []
                 if isContainer {
+                    if let saved = UserDefaults.standard.value(forKey: "savedFiles_\(path.path)") as? [FileItem] {
+                        
+                    }
                     let paths = fsHandlers.getDirPaths(path.path, maxInode: maxInode)
                     for path in paths {
                         unsortedFiles.append(getFileItem(at: URL(fileURLWithPath: path), isContainer: true))
@@ -337,6 +428,7 @@ struct FileBrowserView: View {
             isLoading = false
         }
     }
+     */
     
     private func sortFiles(files: [FileItem]) -> [FileItem] {
         var sortedFiles: [FileItem]

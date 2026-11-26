@@ -7,6 +7,19 @@
 
 import Foundation
 
+// at userdefaults please do not kill me
+extension UserDefaults {
+    func setCodable<T: Encodable>(_ value: T, forKey key: String) {
+        guard let data = try? JSONEncoder().encode(value) else { return }
+        set(data, forKey: key)
+    }
+
+    func codable<T: Decodable>(_ type: T.Type, forKey key: String) -> T? {
+        guard let data = data(forKey: key) else { return nil }
+        return try? JSONDecoder().decode(type, from: data)
+    }
+}
+
 func writeFile(_ data: Data, to url: URL) -> (Bool, String) {
     do {
         try data.write(to: MGURL.fsGestaltURL)
