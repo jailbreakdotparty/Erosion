@@ -7,13 +7,72 @@
 
 import SwiftUI
 
+struct InodeOption: Identifiable, Hashable {
+    var id: String { String(value) }
+    var label: String
+    var value: Int
+}
+
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var mgr: ErosionManager
     @AppStorage("autoRespring") var autoRespring = false
+    
+    @State private var selection: Double = 0
+    @State private var leakedPaths = [String]()
+    
+    private let inodeOptions: [InodeOption] = [
+        InodeOption(label: "Low", value: 100000),
+        InodeOption(label: "Medium", value: 2500000),
+        InodeOption(label: "High", value: 5000000),
+        InodeOption(label: "Extreme", value: 7500000),
+        InodeOption(label: "Max", value: 10000000)
+    ]
+    
+    @State private var inode: Int = 100000
     
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    TextField("PosterBoard", text: $mgr.pbContainerHash)
+                        .disabled(mgr.isFetching)
+                    TextField("Phone", text: $mgr.mpContainerHash)
+                        .disabled(mgr.isFetching)
+                    HStack {
+                        Button {
+                            DispatchQueue.global(qos: .userInitiated).async {
+                                mgr.isFetching = true
+                                let _ = mgr.fetchContainerHashes(withInode: inode)
+                                mgr.isFetching = false
+                            }
+                        } label: {
+                            HStack {
+                                if mgr.isFetching {
+                                    ProgressView().offset(y: -0.5)
+                                }
+                                Text(mgr.isFetching ? "Fetching..." : "Fetch")
+                            }
+                        }
+                        .disabled(mgr.isFetching)
+                        .buttonStyle(.plain)
+                        .foregroundStyle(mgr.isFetching ? .secondary : Color.accentColor)
+                        Spacer()
+                        Picker("Max Inode", selection: $inode) {
+                            ForEach(inodeOptions) { option in
+                                Text(option.label).tag(option.value)
+                            }
+                        }
+                        .disabled(mgr.isFetching)
+                        .labelsHidden()
+                        .padding(.vertical, -6)
+                    }
+                } header: {
+                    HeaderLabel("Container Hashes", symbol: "shippingbox")
+                } footer: {
+                    Text("If hashes do not appear, it may help to adjust the fetching intensity. Higher options will take longer.")
+                }
+                
                 Section {
                     Toggle("Auto-Respring", isOn: $autoRespring)
                 } header: {
@@ -43,6 +102,7 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {

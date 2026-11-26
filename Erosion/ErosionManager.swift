@@ -5,8 +5,8 @@
 //  Created by lunginspector on 8/24/26.
 //
 
-import Foundation
 import Combine
+import SwiftUI
 
 let build = "Build 1"
 
@@ -35,5 +35,41 @@ final class ErosionManager: ObservableObject {
     @Published var storedFiles = [FileItem]()
     @Published var storedURL: URL = URL(fileURLWithPath: "/")
     
+    @AppStorage("pbContainerHash") var pbContainerHash = ""
+    @AppStorage("mpContainerHash") var mpContainerHash = ""
+    private var leakedPaths = [String]()
+    @Published var isFetching = false
+    
     init() {}
+    
+    func getHashesRamp(increment: Int = 2400000, maxAttempts: Int = 4) -> Bool {
+        var currentInode = 100000
+        for _ in 0..<maxAttempts {
+            print("(fs) trying to get container hashes with inode \(currentInode)...")
+            let res = fetchContainerHashes(withInode: currentInode)
+            if res {
+                isFetching = false
+                return true
+            } else {
+                print("(fs) failed to get hashes! retrying with higher inode...")
+                currentInode += increment
+            }
+        }
+        return false
+    }
+    
+    func fetchContainerHashes(withInode maxInode: Int) -> Bool {
+        var mpDidUpdate = false
+        var pbDidUpdate = false
+        leakedPaths = fsHandlers.getDirPaths(FSPaths.appContainers, maxInode: maxInode)
+        if let mpNewHash = fsHandlers.getContainerPath(leakedPaths, forMatch: "com.apple.mobilephone", hashOnly: true) {
+            mpContainerHash = mpNewHash
+            mpDidUpdate = true
+        }
+        if let pbNewHash = fsHandlers.getContainerPath(leakedPaths, forMatch: "com.apple.PosterBoard", hashOnly: true) {
+            pbContainerHash = pbNewHash
+            pbDidUpdate = true
+        }
+        return mpDidUpdate && pbDidUpdate
+    }
 }
