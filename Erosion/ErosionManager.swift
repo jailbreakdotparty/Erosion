@@ -32,8 +32,8 @@ final class ErosionManager: ObservableObject {
     @Published var shouldRespring = false
     @Published var refreshFiles = false
     
-    @Published var storedFiles = [FileItem]()
-    @Published var storedURL: URL = URL(fileURLWithPath: "/")
+    @Published var storedUIFiles = [FileItem]()
+    @Published var storedNavURL: URL = URL(fileURLWithPath: "/")
     
     @AppStorage("pbContainerHash") var pbContainerHash = ""
     @AppStorage("mpContainerHash") var mpContainerHash = ""

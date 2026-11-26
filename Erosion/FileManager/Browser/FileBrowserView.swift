@@ -266,9 +266,8 @@ struct FileBrowserView: View {
             mgr.refreshFiles.toggle()
         }
         .onAppear {
-            if !mgr.storedFiles.isEmpty && mgr.storedURL == path {
-                dirFiles = sortFiles(files: mgr.storedFiles)
-                unfilteredFiles = sortFiles(files: mgr.storedFiles)
+            if !mgr.storedUIFiles.isEmpty && mgr.storedNavURL == path {
+                sortAndUpdateUI(files: mgr.storedUIFiles, sort: chosenSort, ascend: filesAscend)
                 currentState = .loaded
             } else {
                 if shouldGrant {
@@ -289,18 +288,16 @@ struct FileBrowserView: View {
         .modifier(KeyboardDismissObserver() {
             dirFiles = unfilteredFiles
         })
-        .onChange(of: chosenSort) {
+        .onChange(of: chosenSort) { (newSort, _) in
             if isContainer {
-                dirFiles = sortFiles(files: unfilteredFiles)
-                unfilteredFiles = sortFiles(files: unfilteredFiles)
+                sortAndUpdateUI(files: unfilteredFiles, sort: newSort, ascend: filesAscend)
             } else {
                 loadFilesFromPath()
             }
         }
-        .onChange(of: filesAscend) {
+        .onChange(of: filesAscend) { (newAscend, _) in
             if isContainer {
-                dirFiles = sortFiles(files: unfilteredFiles)
-                unfilteredFiles = sortFiles(files: unfilteredFiles)
+                sortAndUpdateUI(files: unfilteredFiles, sort: chosenSort, ascend: newAscend)
             } else {
                 loadFilesFromPath()
             }
@@ -325,7 +322,7 @@ struct FileBrowserView: View {
     
     private func loadFilesFromPath() {
         if isContainer {
-            loadFilesForContainer()
+            loadFilesForContainer(shouldRefresh: true)
         } else {
             loadFiles()
         }
@@ -341,8 +338,7 @@ struct FileBrowserView: View {
                 unsortedFiles = pathFiles.map { fileURL in
                     return getFileItem(at: fileURL)
                 }
-                dirFiles = sortFiles(files: unsortedFiles)
-                unfilteredFiles = sortFiles(files: unsortedFiles)
+                sortAndUpdateUI(files: unsortedFiles, sort: chosenSort, ascend: filesAscend)
                 if dirFiles.isEmpty {
                     currentState = .noFiles
                 } else {
@@ -361,42 +357,44 @@ struct FileBrowserView: View {
         }
     }
     
-    private func loadFilesForContainer() {
+    // if files already exist in saved + nothing's been added to the storedUIFiles array: just load and break
+    private func loadFilesForContainer(shouldRefresh: Bool = false) {
         currentState = .loading
         DispatchQueue.global(qos: .userInitiated).async {
+            if !shouldRefresh && (!mgr.storedUIFiles.isEmpty && mgr.storedNavURL == path) {
+                sortAndUpdateUI(files: mgr.storedUIFiles, sort: chosenSort, ascend: filesAscend)
+                currentState = .loaded
+                return
+            }
             // load what's already been saved for container files (if it exists)
             if let saved = UserDefaults.standard.codable([FileItem].self, forKey: "savedFiles_\(path.path)") {
-                dirFiles = sortFiles(files: saved)
-                unfilteredFiles = sortFiles(files: saved)
+                sortAndUpdateUI(files: saved, sort: chosenSort, ascend: filesAscend)
                 currentState = .loaded
-                if !autoRefresh { return }
                 isLoadingInBackground = true
             }
             // then fetch with pathleak
-            var unsortedFiles: [FileItem] = []
+            var newFiles: [FileItem] = []
             let paths = fsHandlers.getDirPaths(path.path, maxInode: maxInode)
             for path in paths {
-                unsortedFiles.append(getFileItem(at: URL(fileURLWithPath: path)))
+                newFiles.append(getFileItem(at: URL(fileURLWithPath: path)))
             }
-            UserDefaults.standard.setCodable(unsortedFiles, forKey: "savedFiles_\(path.path)")
+            UserDefaults.standard.setCodable(newFiles, forKey: "savedFiles_\(path.path)")
             // if it's empty then write what's already been changed to the ui, else just update the files already showing up in the ui
             DispatchQueue.main.async {
                 if dirFiles.isEmpty {
-                    dirFiles = sortFiles(files: unsortedFiles)
-                    unfilteredFiles = sortFiles(files: unsortedFiles)
+                    sortAndUpdateUI(files: newFiles, sort: chosenSort, ascend: filesAscend)
                 } else {
+                    var currentFiles = unfilteredFiles
                     // remove the files that no longer exist in the unsortedFiles array
-                    let unsortedFileURLs = unsortedFiles.map { $0.fileURL }
-                    dirFiles.removeAll { !unsortedFileURLs.contains($0.fileURL) }
-                    unsortedFiles.removeAll { !unsortedFileURLs.contains($0.fileURL) }
+                    let newFileURLs = newFiles.map { $0.fileURL }
+                    currentFiles.removeAll { !newFileURLs.contains($0.fileURL) }
                     // add any files that do suddenly exist
-                    let existingFileURLs = dirFiles.map { $0.fileURL }
-                    let newFiles = unsortedFiles.filter( { !existingFileURLs.contains($0.fileURL) })
-                    dirFiles = sortFiles(files: dirFiles + newFiles)
-                    unfilteredFiles = sortFiles(files: dirFiles + newFiles)
+                    let existingFileURLs = currentFiles.map { $0.fileURL }
+                    let newFilesNotInUI = newFiles.filter( { !existingFileURLs.contains($0.fileURL) })
+                    sortAndUpdateUI(files: currentFiles + newFilesNotInUI, sort: chosenSort, ascend: filesAscend)
                 }
-                mgr.storedFiles = unfilteredFiles
-                mgr.storedURL = path
+                mgr.storedUIFiles = unfilteredFiles
+                mgr.storedNavURL = path
                 if dirFiles.isEmpty {
                     currentState = .noFiles
                 } else {
@@ -407,52 +405,16 @@ struct FileBrowserView: View {
         }
     }
     
-    /*
-    private func loadFilesFromPath() {
-        isLoading = true
-        DispatchQueue.global(qos: .userInitiated).async {
-            do {
-                var unsortedFiles: [FileItem] = []
-                if isContainer {
-                    if let saved = UserDefaults.standard.value(forKey: "savedFiles_\(path.path)") as? [FileItem] {
-                        
-                    }
-                    let paths = fsHandlers.getDirPaths(path.path, maxInode: maxInode)
-                    for path in paths {
-                        unsortedFiles.append(getFileItem(at: URL(fileURLWithPath: path), isContainer: true))
-                    }
-                } else {
-                    let pathFiles = try fm.contentsOfDirectory(at: path, includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey, .fileSizeKey, .contentModificationDateKey])
-                    
-                    unsortedFiles = pathFiles.map { fileURL in
-                        if path == FSURL.appGroup || path == FSURL.systemData {
-                            return getFileItem(at: fileURL, isContainer: true)
-                        } else {
-                            return getFileItem(at: fileURL)
-                        }
-                    }
-                }
-                dirFiles = sortFiles(files: unsortedFiles)
-                unfilteredFiles = sortFiles(files: unsortedFiles)
-                if isContainer {
-                    mgr.storedFiles = unsortedFiles
-                    mgr.storedURL = path
-                }
-                hasLoaded = true
-            } catch {
-                print("(fm) failed to load files from \(path): \(error.localizedDescription)")
-                showFailure = true
-                failMsg = "You may not have permission to view this directory. Check error logs for more detailed info."
-            }
-            isLoading = false
-        }
+    private func sortAndUpdateUI(files: [FileItem], sort: FileSortMode, ascend: Bool) {
+        let sorted = sortFiles(files: files, sort: sort, ascend: ascend)
+        dirFiles = sorted
+        unfilteredFiles = sorted
     }
-     */
     
-    private func sortFiles(files: [FileItem]) -> [FileItem] {
+    private func sortFiles(files: [FileItem], sort: FileSortMode, ascend: Bool) -> [FileItem] {
         var sortedFiles: [FileItem]
         
-        switch chosenSort {
+        switch sort {
         case .system:
             sortedFiles = files
         case .name:
@@ -465,7 +427,7 @@ struct FileBrowserView: View {
             sortedFiles = files.sorted { $0.size < $1.size }
         }
 
-        sortedFiles = filesAscend ? sortedFiles : sortedFiles.reversed()
+        sortedFiles = ascend ? sortedFiles : sortedFiles.reversed()
         sortedFiles = sortedFiles.sorted { a, b in
             a.hidden && !b.hidden
         }

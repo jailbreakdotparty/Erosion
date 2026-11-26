@@ -9,7 +9,7 @@ import Foundation
 import UniformTypeIdentifiers
 
 struct FileItem: Identifiable, Codable {
-    var id = UUID()
+    var id: String { name }
     var name: String
     var fileURL: URL
     var destURL: URL
