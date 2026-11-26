@@ -113,45 +113,50 @@ struct FileBrowserView: View {
         }
         .navigationTitle(path.lastPathComponent)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationSubtitle(isLoadingInBackground ? "Reloading Files..." : "")
         .customListStyle(listStyle)
         .adaptiveListMargin()
         .searchable(text: $searchText)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                if isLoadingInBackground {
-                    ProgressView()
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    ForEach(FileSortMode.allCases, id: \.self) { option in
-                        Button {
-                            chosenSort = option
-                        } label: {
-                            if chosenSort == option {
-                                Label(option.label, systemImage: "checkmark")
-                                    .tag(option)
-                            } else {
-                                Text(option.label)
-                                    .tag(option)
+            if !isContainer {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        ForEach(FileSortMode.allCases, id: \.self) { option in
+                            Button {
+                                chosenSort = option
+                            } label: {
+                                if chosenSort == option {
+                                    Label(option.label, systemImage: "checkmark")
+                                        .tag(option)
+                                } else {
+                                    Text(option.label)
+                                        .tag(option)
+                                }
                             }
                         }
+                        Divider()
+                        Button {
+                            filesAscend.toggle()
+                        } label: {
+                            if filesAscend {
+                                Label("Ascending", systemImage: "chevron.up")
+                            } else {
+                                Label("Descending", systemImage: "chevron.down")
+                            }
+                        }
+                    } label: {
+                        Label("Sort", systemImage: "line.3.horizontal.decrease")
                     }
-                    Divider()
+                    .labelStyle(.iconOnly)
+                }
+            } else {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         filesAscend.toggle()
                     } label: {
-                        if filesAscend {
-                            Label("Ascending", systemImage: "chevron.up")
-                        } else {
-                            Label("Descending", systemImage: "chevron.down")
-                        }
+                        Label("Sort", systemImage: "arrow.up.arrow.down").labelStyle(.iconOnly)
                     }
-                    .disabled(chosenSort == .system)
-                } label: {
-                    Label("Sort", systemImage: "line.3.horizontal.decrease")
                 }
-                .labelStyle(.iconOnly)
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
@@ -264,6 +269,7 @@ struct FileBrowserView: View {
             if !mgr.storedFiles.isEmpty && mgr.storedURL == path {
                 dirFiles = sortFiles(files: mgr.storedFiles)
                 unfilteredFiles = sortFiles(files: mgr.storedFiles)
+                currentState = .loaded
             } else {
                 if shouldGrant {
                     let res = wq.grantAccess(path: path.path)
@@ -277,7 +283,6 @@ struct FileBrowserView: View {
                 }
             }
         }
-        // I want to talk to the Apple Engineer who thought it would be cool to remove the one-parameter action closure from onChange.
         .onChange(of: searchText) { (newSearch, _) in
             dirFiles = unfilteredFiles.filter { $0.name.localizedCaseInsensitiveContains(newSearch) }
         }
@@ -285,10 +290,20 @@ struct FileBrowserView: View {
             dirFiles = unfilteredFiles
         })
         .onChange(of: chosenSort) {
-            loadFilesFromPath()
+            if isContainer {
+                dirFiles = sortFiles(files: unfilteredFiles)
+                unfilteredFiles = sortFiles(files: unfilteredFiles)
+            } else {
+                loadFilesFromPath()
+            }
         }
         .onChange(of: filesAscend) {
-            loadFilesFromPath()
+            if isContainer {
+                dirFiles = sortFiles(files: unfilteredFiles)
+                unfilteredFiles = sortFiles(files: unfilteredFiles)
+            } else {
+                loadFilesFromPath()
+            }
         }
         .onChange(of: mgr.refreshFiles) {
             loadFilesFromPath()
@@ -365,26 +380,30 @@ struct FileBrowserView: View {
             }
             UserDefaults.standard.setCodable(unsortedFiles, forKey: "savedFiles_\(path.path)")
             // if it's empty then write what's already been changed to the ui, else just update the files already showing up in the ui
-            if dirFiles.isEmpty {
-                dirFiles = sortFiles(files: unsortedFiles)
-                unfilteredFiles = sortFiles(files: unsortedFiles)
-            } else {
-                // remove the files that no longer exist in the unsortedFiles array
-                let unsortedFileURLs = unsortedFiles.map { $0.fileURL }
-                dirFiles.removeAll { !unsortedFileURLs.contains($0.fileURL) }
-                unsortedFiles.removeAll { !unsortedFileURLs.contains($0.fileURL) }
-                // add any files that do suddenly exist
-                let existingFileURLs = dirFiles.map { $0.fileURL }
-                let newFiles = unsortedFiles.filter( { !existingFileURLs.contains($0.fileURL) })
-                dirFiles = sortFiles(files: dirFiles + newFiles)
-                unsortedFiles = sortFiles(files: dirFiles + newFiles)
+            DispatchQueue.main.async {
+                if dirFiles.isEmpty {
+                    dirFiles = sortFiles(files: unsortedFiles)
+                    unfilteredFiles = sortFiles(files: unsortedFiles)
+                } else {
+                    // remove the files that no longer exist in the unsortedFiles array
+                    let unsortedFileURLs = unsortedFiles.map { $0.fileURL }
+                    dirFiles.removeAll { !unsortedFileURLs.contains($0.fileURL) }
+                    unsortedFiles.removeAll { !unsortedFileURLs.contains($0.fileURL) }
+                    // add any files that do suddenly exist
+                    let existingFileURLs = dirFiles.map { $0.fileURL }
+                    let newFiles = unsortedFiles.filter( { !existingFileURLs.contains($0.fileURL) })
+                    dirFiles = sortFiles(files: dirFiles + newFiles)
+                    unfilteredFiles = sortFiles(files: dirFiles + newFiles)
+                }
+                mgr.storedFiles = unfilteredFiles
+                mgr.storedURL = path
+                if dirFiles.isEmpty {
+                    currentState = .noFiles
+                } else {
+                    currentState = .loaded
+                }
+                isLoadingInBackground = false
             }
-            if dirFiles.isEmpty {
-                currentState = .noFiles
-            } else {
-                currentState = .loaded
-            }
-            isLoadingInBackground = false
         }
     }
     

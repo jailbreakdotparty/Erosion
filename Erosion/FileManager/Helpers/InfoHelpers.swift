@@ -46,6 +46,7 @@ func getBIDFromXattr(_ url: URL) -> String? {
     return nil
 }
 
+/*
 func metadataID(from data: Data) -> String? {
     let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any]
     return plist?["MCMMetadataIdentifier"] as? String
@@ -69,6 +70,7 @@ func readMetaKey(at url: URL, key: String) -> String? {
 
     return plist[key] as? String
 }
+ */
 
 enum SysBID {
     static var phone = "com.apple.mobilephone"
